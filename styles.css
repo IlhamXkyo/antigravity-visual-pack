@@ -451,13 +451,14 @@ ul, ol {
 .nav__side {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
 }
 
 .nav__clock {
   color: var(--muted);
   font-size: 0.66rem;
+  white-space: nowrap;
 }
 
 .nav__clock em {

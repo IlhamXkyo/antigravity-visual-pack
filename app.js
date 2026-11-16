@@ -207,6 +207,9 @@ if (finePointer && !reducedMotion && cursor) {
     el.addEventListener("pointerleave", () => {
       cursor.classList.remove("is-active");
     });
+    el.addEventListener("click", () => {
+      cursor.classList.remove("is-active");
+    });
   });
 }
 
