@@ -7,14 +7,13 @@ const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const lerp = (a, b, n) => a + (b - a) * n;
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
 let isMotionPaused = reducedMotion;
 
 // ============================================================================
-// 0. WEB AUDIO TACTILE & PET SYNTHESIZER
+// 0. TACTILE SYNTHESIZER (SUBTLE WEB AUDIO FEEDBACK)
 // ============================================================================
 let audioCtx = null;
-function playSound(kind = "tick") {
+function playTone(type = "click") {
   if (isMotionPaused) return;
   try {
     if (!audioCtx) {
@@ -29,102 +28,30 @@ function playSound(kind = "tick") {
     osc.connect(gain);
     gain.connect(audioCtx.destination);
 
-    if (kind === "meow") {
+    if (type === "chime") {
       osc.type = "triangle";
-      osc.frequency.setValueAtTime(480, now);
-      osc.frequency.exponentialRampToValueAtTime(920, now + 0.11);
-      osc.frequency.exponentialRampToValueAtTime(620, now + 0.24);
-      gain.gain.setValueAtTime(0.06, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(980, now + 0.12);
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
       osc.start(now);
-      osc.stop(now + 0.26);
-    } else if (kind === "catch") {
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(580, now);
-      osc.frequency.exponentialRampToValueAtTime(1180, now + 0.12);
-      gain.gain.setValueAtTime(0.055, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-      osc.start(now);
-      osc.stop(now + 0.14);
-    } else if (kind === "fail") {
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.linearRampToValueAtTime(130, now + 0.18);
-      gain.gain.setValueAtTime(0.045, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-      osc.start(now);
-      osc.stop(now + 0.2);
+      osc.stop(now + 0.15);
     } else {
       osc.type = "sine";
-      osc.frequency.setValueAtTime(280, now);
-      osc.frequency.exponentialRampToValueAtTime(140, now + 0.04);
+      osc.frequency.setValueAtTime(260, now);
+      osc.frequency.exponentialRampToValueAtTime(130, now + 0.04);
       gain.gain.setValueAtTime(0.035, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
       osc.start(now);
       osc.stop(now + 0.045);
     }
   } catch {
-    // Ignore if blocked before user gesture
+    // Ignore before user gesture
   }
 }
 
 // ============================================================================
-// 1. PRELOADER -> HERO ENTRANCE & CLOCK
-// ============================================================================
-const clockEl = $("#clock");
-const timeFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Asia/Jayapura",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-});
-function updateClock() {
-  if (clockEl) clockEl.innerHTML = `${timeFmt.format(new Date())} <em>WIT</em>`;
-}
-updateClock();
-setInterval(updateClock, 1000);
-
-const loader = $("#loader");
-if (!loader || reducedMotion) {
-  loader?.remove();
-  doc.body.classList.add("is-ready");
-} else {
-  doc.body.classList.add("is-locked");
-  const numEl = $("#loadNum");
-  const barEl = $("#loadBar");
-  const t0 = performance.now();
-  const dur = 1150;
-  let done = false;
-
-  const finishLoader = () => {
-    if (done) return;
-    done = true;
-    if (numEl) numEl.textContent = "100";
-    if (barEl) barEl.style.width = "100%";
-    setTimeout(() => {
-      loader.classList.add("is-done");
-      doc.body.classList.remove("is-locked");
-      doc.body.classList.add("is-ready");
-      setTimeout(() => loader.remove(), 1100);
-    }, 120);
-  };
-
-  const stepLoader = (now) => {
-    const k = clamp((now - t0) / dur, 0, 1);
-    const eased = 1 - Math.pow(1 - k, 3);
-    const val = Math.round(eased * 100);
-    if (numEl) numEl.textContent = String(val).padStart(3, "0");
-    if (barEl) barEl.style.width = `${val}%`;
-    if (k < 1) requestAnimationFrame(stepLoader);
-    else finishLoader();
-  };
-  requestAnimationFrame(stepLoader);
-  setTimeout(finishLoader, 2400);
-}
-
-// ============================================================================
-// 2. LENIS SMOOTH SCROLL + GSAP SCROLLTRIGGER + MAGNETIC CURSOR
+// 1. UNIFIED LENIS + GSAP SCROLLTRIGGER LOOP & NAVIGATION
 // ============================================================================
 const hasGSAP = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 if (hasGSAP) window.gsap.registerPlugin(window.ScrollTrigger);
@@ -132,7 +59,7 @@ if (hasGSAP) window.gsap.registerPlugin(window.ScrollTrigger);
 let lenis = null;
 if (typeof window.Lenis !== "undefined" && !reducedMotion) {
   lenis = new window.Lenis({
-    duration: 1.12,
+    duration: 1.05,
     easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     smoothWheel: true,
   });
@@ -145,408 +72,243 @@ if (typeof window.Lenis !== "undefined" && !reducedMotion) {
   }
 }
 
-const nav = $("#nav");
-const scrollFill = $("#scrollFill");
+// Scroll Progress & Active Section Observer
+const progressBar = $("#scroll-progress-bar");
 window.addEventListener(
   "scroll",
   () => {
     const sy = window.scrollY || 0;
-    nav?.classList.toggle("is-scrolled", sy > 48);
-    const maxScroll = Math.max(1, doc.documentElement.scrollHeight - window.innerHeight);
-    if (scrollFill) {
-      scrollFill.style.transform = `scaleX(${clamp(sy / maxScroll, 0, 1)})`;
+    const max = Math.max(1, doc.documentElement.scrollHeight - window.innerHeight);
+    if (progressBar) {
+      progressBar.style.transform = `scaleX(${clamp(sy / max, 0, 1)})`;
     }
   },
   { passive: true }
 );
 
-// Magnetic Cursor & Spotlight
-const cursor = $("#cursor");
-const cursorDot = $("#cursorDot");
-const cursorRing = $("#cursorRing");
-const cursorLabel = $("#cursorLabel");
-const coordX = $("#coordX");
-const coordY = $("#coordY");
-let px = window.innerWidth * 0.5;
-let py = window.innerHeight * 0.4;
-let rx = px;
-let ry = py;
-
-if (finePointer && !reducedMotion && cursor) {
-  window.addEventListener(
-    "pointermove",
-    (e) => {
-      px = e.clientX;
-      py = e.clientY;
-      if (cursorDot) {
-        cursorDot.style.transform = `translate3d(${px}px,${py}px,0) translate(-50%,-50%)`;
+const sections = $$(".story-section");
+const navLinks = $$(".nav-link");
+const secObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach((l) => l.classList.toggle("active", l.getAttribute("data-sec") === id));
       }
-      if (coordX) coordX.textContent = `X ${String(Math.round(px)).padStart(4, "0")}`;
-      if (coordY) coordY.textContent = `Y ${String(Math.round(py)).padStart(4, "0")}`;
-      doc.documentElement.style.setProperty("--mx", `${px}px`);
-      doc.documentElement.style.setProperty("--my", `${py}px`);
-    },
-    { passive: true }
-  );
-
-  const tickCursor = () => {
-    rx = lerp(rx, px, 0.18);
-    ry = lerp(ry, py, 0.18);
-    if (cursorRing) {
-      cursorRing.style.transform = `translate3d(${rx}px,${ry}px,0) translate(-50%,-50%)`;
-    }
-    requestAnimationFrame(tickCursor);
-  };
-  requestAnimationFrame(tickCursor);
-
-  $$("[data-cursor]").forEach((el) => {
-    el.addEventListener("pointerenter", () => {
-      cursor.classList.add("is-active");
-      if (cursorLabel) cursorLabel.textContent = el.getAttribute("data-cursor") || "OPEN";
     });
-    el.addEventListener("pointerleave", () => {
-      cursor.classList.remove("is-active");
-    });
-    el.addEventListener("click", () => {
-      cursor.classList.remove("is-active");
-    });
-  });
-}
+  },
+  { threshold: 0.25 }
+);
+sections.forEach((s) => secObserver.observe(s));
+
+// Ambient Spotlight Pointer Tracking
+window.addEventListener(
+  "pointermove",
+  (e) => {
+    doc.documentElement.style.setProperty("--mx", `${e.clientX}px`);
+    doc.documentElement.style.setProperty("--my", `${e.clientY}px`);
+
+    const eyes = $("#fox-dock-eyes");
+    if (eyes && !isMotionPaused) {
+      const dx = clamp(((e.clientX / window.innerWidth) - 0.85) * 6, -3.5, 3.5);
+      const dy = clamp(((e.clientY / window.innerHeight) - 0.85) * 6, -3.5, 3.5);
+      eyes.setAttribute("transform", `translate(${dx.toFixed(1)}, ${dy.toFixed(1)})`);
+    }
+  },
+  { passive: true }
+);
 
 // ============================================================================
-// 3. HERO WEBGL LUMINOUS FBM FLOW SHADER (#gl-hero)
+// 2. THREE.JS r186 REAL-TIME 3D STAGE (ORIGAMI FOX & EXPLODED SPATIAL CORE)
 // ============================================================================
-(function initHeroShader() {
-  const canvas = $("#gl-hero");
-  if (!canvas || reducedMotion) return;
-  const gl = canvas.getContext("webgl", { antialias: false, alpha: false, depth: false });
-  if (!gl) return;
+const stage3d = $("#webgl-stage");
+const fpsReadout = $("#fps-readout");
+let pulse3D = () => {};
 
-  const VERT = `
-    attribute vec2 aPos;
-    void main() {
-      gl_Position = vec4(aPos, 0.0, 1.0);
-    }
-  `;
-  const FRAG = `
-    precision highp float;
-    uniform vec2 uRes;
-    uniform float uTime;
-    uniform vec2 uMouse;
-
-    float hash21(vec2 p) {
-      p = fract(p * vec2(123.34, 456.21));
-      p += dot(p, p + 45.32);
-      return fract(p.x * p.y);
-    }
-    float vnoise(vec2 p) {
-      vec2 i = floor(p);
-      vec2 f = fract(p);
-      f = f * f * (3.0 - 2.0 * f);
-      float a = hash21(i);
-      float b = hash21(i + vec2(1.0, 0.0));
-      float c = hash21(i + vec2(0.0, 1.0));
-      float d = hash21(i + vec2(1.0, 1.0));
-      return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-    }
-    float fbm(vec2 p) {
-      float s = 0.0;
-      float a = 0.5;
-      for (int i = 0; i < 5; i++) {
-        s += a * vnoise(p);
-        p = p * 2.02 + vec2(1.7, -2.3);
-        a *= 0.5;
-      }
-      return s;
-    }
-    void main() {
-      vec2 p = (gl_FragCoord.xy * 2.0 - uRes) / min(uRes.x, uRes.y);
-      float t = uTime * 0.06;
-      vec2 m = uMouse * 0.22;
-
-      vec3 col = vec3(0.025, 0.027, 0.036);
-      float warp = fbm(p * 1.18 + vec2(t * 0.48, -t * 0.3) + m * 0.5);
-
-      float curve = 0.25 + 0.12 * sin(p.x * 1.1 + 0.5) + 0.09 * warp;
-      float dy = p.y - curve;
-      float band = exp(-dy * dy * 6.5);
-      float core = exp(-dy * dy * 36.0);
-
-      vec3 arcCol = mix(vec3(0.0, 0.82, 0.70), vec3(0.85, 1.0, 0.29), smoothstep(-0.9, 0.9, p.x));
-      col += arcCol * band * 0.38;
-      col += vec3(0.98, 1.0, 0.82) * core * 0.18;
-
-      float fl = pow(1.0 - abs(sin(p.y * 30.0 + warp * 4.2 + t * 2.2)), 30.0);
-      col += vec3(0.85, 1.0, 0.35) * fl * band * 0.55;
-
-      float v = length(p * vec2(0.75, 0.95));
-      col *= 1.0 - 0.45 * smoothstep(0.55, 1.8, v);
-      gl_FragColor = vec4(col, 1.0);
-    }
-  `;
-
-  const compile = (type, src) => {
-    const sh = gl.createShader(type);
-    gl.shaderSource(sh, src);
-    gl.compileShader(sh);
-    return gl.getShaderParameter(sh, gl.COMPILE_STATUS) ? sh : null;
-  };
-  const vs = compile(gl.VERTEX_SHADER, VERT);
-  const fs = compile(gl.FRAGMENT_SHADER, FRAG);
-  if (!vs || !fs) return;
-
-  const prog = gl.createProgram();
-  gl.attachShader(prog, vs);
-  gl.attachShader(prog, fs);
-  gl.linkProgram(prog);
-  gl.useProgram(prog);
-
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-  const aPos = gl.getAttribLocation(prog, "aPos");
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  const uRes = gl.getUniformLocation(prog, "uRes");
-  const uTime = gl.getUniformLocation(prog, "uTime");
-  const uMouse = gl.getUniformLocation(prog, "uMouse");
-
-  const resize = () => {
-    const r = canvas.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    canvas.width = Math.max(1, Math.round(r.width * dpr));
-    canvas.height = Math.max(1, Math.round(r.height * dpr));
-    gl.viewport(0, 0, canvas.width, canvas.height);
-    gl.uniform2f(uRes, canvas.width, canvas.height);
-  };
-  resize();
-  window.addEventListener("resize", resize, { passive: true });
-
-  let mx = 0, my = 0, tx = 0, ty = 0;
-  window.addEventListener(
-    "pointermove",
-    (e) => {
-      tx = (e.clientX / window.innerWidth) * 2 - 1;
-      ty = -((e.clientY / window.innerHeight) * 2 - 1);
-    },
-    { passive: true }
-  );
-
-  const tStart = performance.now();
-  const loop = (now) => {
-    if (!isMotionPaused) {
-      mx = lerp(mx, tx, 0.05);
-      my = lerp(my, ty, 0.05);
-      gl.uniform1f(uTime, (now - tStart) * 0.001);
-      gl.uniform2f(uMouse, mx, my);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
-    }
-    requestAnimationFrame(loop);
-  };
-  requestAnimationFrame(loop);
-})();
-
-// ============================================================================
-// 4. THREE.JS r186 REAL-TIME 3D STAGE (#webgl-canvas-wrap)
-// ============================================================================
-const wrap3d = $("#webgl-canvas-wrap");
-const fpsBadge = $("#fps-badge");
-let trigger3DJump = () => {};
-
-if (wrap3d) {
+if (stage3d) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(wrap3d.clientWidth, wrap3d.clientHeight);
+  renderer.setSize(stage3d.clientWidth, stage3d.clientHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
-  wrap3d.appendChild(renderer.domElement);
+  renderer.toneMappingExposure = 1.18;
+  stage3d.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, wrap3d.clientWidth / wrap3d.clientHeight, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(42, stage3d.clientWidth / stage3d.clientHeight, 0.1, 100);
   camera.position.set(0, 0.35, 5.1);
 
-  scene.add(new THREE.AmbientLight(0xfff6e5, 0.85));
-  const keyLight = new THREE.DirectionalLight(0xd9ff4b, 2.5);
+  scene.add(new THREE.AmbientLight(0xfff8eb, 0.85));
+  const keyLight = new THREE.DirectionalLight(0xe2ff54, 2.3);
   keyLight.position.set(3.5, 4.5, 4.2);
   scene.add(keyLight);
 
-  const rimLight = new THREE.DirectionalLight(0x00d1b2, 2.1);
-  rimLight.position.set(-4.0, 2.2, -3.2);
+  const rimLight = new THREE.DirectionalLight(0x2dd4bf, 2.0);
+  rimLight.position.set(-4.0, 2.0, -3.0);
   scene.add(rimLight);
 
-  const warmLight = new THREE.PointLight(0xffb020, 2.2, 10);
-  warmLight.position.set(0, -1.8, 2.5);
-  scene.add(warmLight);
-
   const amberMat = new THREE.MeshStandardMaterial({
-    color: 0xffb020,
-    roughness: 0.25,
-    metalness: 0.4,
+    color: 0xf59e0b,
+    roughness: 0.26,
+    metalness: 0.38,
     flatShading: true,
   });
   const boneMat = new THREE.MeshStandardMaterial({
-    color: 0xf3efe6,
+    color: 0xf4f2ed,
     roughness: 0.35,
     metalness: 0.15,
     flatShading: true,
   });
   const darkMat = new THREE.MeshStandardMaterial({
-    color: 0x13151c,
+    color: 0x101219,
     roughness: 0.25,
     metalness: 0.8,
   });
-  const limeGlowMat = new THREE.MeshStandardMaterial({
-    color: 0xd9ff4b,
-    emissive: 0x84cc16,
-    emissiveIntensity: 0.85,
-    roughness: 0.2,
-    metalness: 0.5,
-  });
-  const tealGlowMat = new THREE.MeshStandardMaterial({
-    color: 0x00d1b2,
-    emissive: 0x0d9488,
+  const limeMat = new THREE.MeshStandardMaterial({
+    color: 0xe2ff54,
+    emissive: 0x65a30d,
     emissiveIntensity: 0.75,
     roughness: 0.2,
     metalness: 0.5,
   });
-  const allMats = [amberMat, boneMat, darkMat, limeGlowMat, tealGlowMat];
+  const tealMat = new THREE.MeshStandardMaterial({
+    color: 0x2dd4bf,
+    emissive: 0x0d9488,
+    emissiveIntensity: 0.7,
+    roughness: 0.2,
+    metalness: 0.5,
+  });
+  const allMaterials = [amberMat, boneMat, darkMat, limeMat, tealMat];
 
-  const rootGroup = new THREE.Group();
-  scene.add(rootGroup);
+  const root = new THREE.Group();
+  scene.add(root);
 
-  // Mode 1: 3D Cyber-Kitsune ("Kuro")
-  const kitsuneGroup = new THREE.Group();
-  rootGroup.add(kitsuneGroup);
+  // Group 1: Origami Fox
+  const foxGroup = new THREE.Group();
+  root.add(foxGroup);
 
-  const headGeo = new THREE.OctahedronGeometry(1.05, 1);
-  headGeo.scale(1.16, 0.92, 0.95);
-  kitsuneGroup.add(new THREE.Mesh(headGeo, amberMat));
+  const headGeo = new THREE.OctahedronGeometry(1.04, 1);
+  headGeo.scale(1.15, 0.92, 0.95);
+  foxGroup.add(new THREE.Mesh(headGeo, amberMat));
 
-  const snoutGeo = new THREE.ConeGeometry(0.68, 0.88, 4);
+  const snoutGeo = new THREE.ConeGeometry(0.66, 0.86, 4);
   snoutGeo.rotateX(Math.PI * 0.5);
   const snout = new THREE.Mesh(snoutGeo, boneMat);
-  snout.position.set(0, -0.18, 0.76);
-  kitsuneGroup.add(snout);
+  snout.position.set(0, -0.18, 0.75);
+  foxGroup.add(snout);
 
-  const nose = new THREE.Mesh(new THREE.OctahedronGeometry(0.13, 0), darkMat);
-  nose.position.set(0, -0.1, 1.2);
-  kitsuneGroup.add(nose);
+  const nose = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), darkMat);
+  nose.position.set(0, -0.1, 1.18);
+  foxGroup.add(nose);
 
-  const earGeo = new THREE.ConeGeometry(0.38, 0.98, 4);
+  const earGeo = new THREE.ConeGeometry(0.36, 0.95, 4);
   const earL = new THREE.Group();
-  earL.position.set(-0.58, 0.66, 0.05);
+  earL.position.set(-0.56, 0.65, 0.05);
   earL.rotation.z = 0.28;
-  const earLMesh = new THREE.Mesh(earGeo, amberMat);
-  earLMesh.position.y = 0.4;
-  earL.add(earLMesh);
-  kitsuneGroup.add(earL);
+  const earLM = new THREE.Mesh(earGeo, amberMat);
+  earLM.position.y = 0.38;
+  earL.add(earLM);
+  foxGroup.add(earL);
 
   const earR = new THREE.Group();
-  earR.position.set(0.58, 0.66, 0.05);
+  earR.position.set(0.56, 0.65, 0.05);
   earR.rotation.z = -0.28;
-  const earRMesh = new THREE.Mesh(earGeo, amberMat);
-  earRMesh.position.y = 0.4;
-  earR.add(earRMesh);
-  kitsuneGroup.add(earR);
+  const earRM = new THREE.Mesh(earGeo, amberMat);
+  earRM.position.y = 0.38;
+  earR.add(earRM);
+  foxGroup.add(earR);
 
-  const eyeGeo = new THREE.BoxGeometry(0.26, 0.11, 0.1);
-  const eyeL = new THREE.Mesh(eyeGeo, limeGlowMat);
-  eyeL.position.set(-0.42, 0.12, 0.87);
-  eyeL.rotation.z = -0.12;
-  kitsuneGroup.add(eyeL);
+  const eyeGeo = new THREE.BoxGeometry(0.24, 0.1, 0.1);
+  const eyeL = new THREE.Mesh(eyeGeo, limeMat);
+  eyeL.position.set(-0.4, 0.12, 0.86);
+  eyeL.rotation.z = -0.1;
+  foxGroup.add(eyeL);
 
-  const eyeR = new THREE.Mesh(eyeGeo, limeGlowMat);
-  eyeR.position.set(0.42, 0.12, 0.87);
-  eyeR.rotation.z = 0.12;
-  kitsuneGroup.add(eyeR);
+  const eyeR = new THREE.Mesh(eyeGeo, limeMat);
+  eyeR.position.set(0.4, 0.12, 0.86);
+  eyeR.rotation.z = 0.1;
+  foxGroup.add(eyeR);
 
-  // 3-Plane Origami Tails
-  const tails = new THREE.Group();
-  tails.position.set(0, -0.35, -0.88);
-  kitsuneGroup.add(tails);
-  for (let i = -1; i <= 1; i++) {
-    const tGeo = new THREE.OctahedronGeometry(0.42, 0);
-    tGeo.scale(0.55, 1.5, 0.45);
-    const tMesh = new THREE.Mesh(tGeo, i === 0 ? limeGlowMat : amberMat);
-    tMesh.position.set(i * 0.56, Math.abs(i) * -0.1, -0.2);
-    tMesh.rotation.z = -i * 0.46;
-    tMesh.rotation.x = -0.42;
-    tails.add(tMesh);
+  const orbitA = new THREE.Mesh(new THREE.TorusGeometry(1.65, 0.02, 12, 72), limeMat);
+  orbitA.rotation.x = Math.PI * 0.42;
+  const orbitB = new THREE.Mesh(new THREE.TorusGeometry(1.85, 0.015, 12, 72), tealMat);
+  orbitB.rotation.y = Math.PI * 0.25;
+  foxGroup.add(orbitA, orbitB);
+
+  // Group 2: Exploded Spatial Core
+  const coreGroup = new THREE.Group();
+  coreGroup.visible = false;
+  root.add(coreGroup);
+
+  const centerCrystal = new THREE.Mesh(new THREE.IcosahedronGeometry(0.68, 0), limeMat);
+  const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.04, 16, 64), amberMat);
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.48, 0.03, 16, 64), tealMat);
+  const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.025, 16, 64), boneMat);
+  coreGroup.add(centerCrystal, ring1, ring2, ring3);
+
+  const satellites = [];
+  for (let i = 0; i < 6; i++) {
+    const sat = new THREE.Mesh(new THREE.OctahedronGeometry(0.18, 0), i % 2 === 0 ? amberMat : tealMat);
+    const angle = (i / 6) * Math.PI * 2;
+    sat.userData = { angle };
+    sat.position.set(Math.cos(angle) * 1.45, Math.sin(angle) * 1.45, 0);
+    coreGroup.add(sat);
+    satellites.push(sat);
   }
 
-  // Dual Calibration Rings
-  const ringA = new THREE.Mesh(new THREE.TorusGeometry(1.68, 0.022, 12, 72), limeGlowMat);
-  ringA.rotation.x = Math.PI * 0.42;
-  const ringB = new THREE.Mesh(new THREE.TorusGeometry(1.88, 0.016, 12, 72), tealGlowMat);
-  ringB.rotation.y = Math.PI * 0.25;
-  kitsuneGroup.add(ringA, ringB);
+  let isDragging = false;
+  let px = 0, py = 0;
+  let targetY = 0.25, targetX = 0.08;
+  let jumpVel = 0, jumpY = 0, spinBoost = 0;
 
-  // Mode 2: Gyroscopic Spatial Core
-  const gyroGroup = new THREE.Group();
-  gyroGroup.visible = false;
-  rootGroup.add(gyroGroup);
-
-  const coreIco = new THREE.Mesh(new THREE.IcosahedronGeometry(0.75, 0), limeGlowMat);
-  const gRing1 = new THREE.Mesh(new THREE.TorusGeometry(1.18, 0.045, 16, 64), amberMat);
-  const gRing2 = new THREE.Mesh(new THREE.TorusGeometry(1.52, 0.035, 16, 64), tealGlowMat);
-  const gRing3 = new THREE.Mesh(new THREE.TorusGeometry(1.86, 0.028, 16, 64), boneMat);
-  gyroGroup.add(coreIco, gRing1, gRing2, gRing3);
-
-  let dragging = false;
-  let prevX = 0, prevY = 0;
-  let targetRotY = 0.28, targetRotX = 0.08;
-  let jumpVel = 0, jumpY = 0, spinVel = 0;
-
-  wrap3d.addEventListener("pointerdown", (e) => {
-    dragging = true;
-    prevX = e.clientX;
-    prevY = e.clientY;
+  stage3d.addEventListener("pointerdown", (e) => {
+    isDragging = true;
+    px = e.clientX;
+    py = e.clientY;
   });
   window.addEventListener("pointermove", (e) => {
-    if (dragging) {
-      targetRotY += (e.clientX - prevX) * 0.011;
-      targetRotX = clamp(targetRotX + (e.clientY - prevY) * 0.008, -0.65, 0.65);
-      prevX = e.clientX;
-      prevY = e.clientY;
+    if (isDragging) {
+      targetY += (e.clientX - px) * 0.01;
+      targetX = clamp(targetX + (e.clientY - py) * 0.008, -0.6, 0.6);
+      px = e.clientX;
+      py = e.clientY;
     } else if (!isMotionPaused) {
       const nx = (e.clientX / window.innerWidth) * 2 - 1;
       const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      targetRotY = nx * 0.48;
-      targetRotX = ny * 0.24;
+      targetY = nx * 0.42;
+      targetX = ny * 0.22;
     }
   });
   window.addEventListener("pointerup", () => {
-    dragging = false;
+    isDragging = false;
   });
 
-  trigger3DJump = () => {
-    playSound("catch");
-    jumpVel = 0.15;
-    spinVel = 0.26;
+  pulse3D = () => {
+    playTone("chime");
+    jumpVel = 0.14;
+    spinBoost = 0.24;
   };
 
-  $$("[data-3d-mode]").forEach((btn) => {
+  $$("[data-3d]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      playSound("tick");
-      $$("[data-3d-mode]").forEach((b) => b.classList.remove("active"));
+      playTone("click");
+      $$("[data-3d]").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-      const mode = btn.getAttribute("data-3d-mode");
-      if (mode === "kitsune") {
-        kitsuneGroup.visible = true;
-        gyroGroup.visible = false;
-        allMats.forEach((m) => (m.wireframe = false));
-      } else if (mode === "gyro") {
-        kitsuneGroup.visible = false;
-        gyroGroup.visible = true;
-        allMats.forEach((m) => (m.wireframe = false));
+      const mode = btn.getAttribute("data-3d");
+      if (mode === "fox") {
+        foxGroup.visible = true;
+        coreGroup.visible = false;
+        allMaterials.forEach((m) => (m.wireframe = false));
+      } else if (mode === "core") {
+        foxGroup.visible = false;
+        coreGroup.visible = true;
+        allMaterials.forEach((m) => (m.wireframe = false));
       } else {
-        allMats.forEach((m) => (m.wireframe = true));
+        allMaterials.forEach((m) => (m.wireframe = true));
       }
     });
   });
 
-  $("#btn-3d-jump")?.addEventListener("click", () => trigger3DJump());
+  $("#btn-3d-pulse")?.addEventListener("click", () => pulse3D());
 
   const timer = new THREE.Timer();
   timer.connect(doc);
@@ -560,8 +322,8 @@ if (wrap3d) {
     frames++;
     acc += dt;
     if (acc >= 0.5) {
-      if (fpsBadge) {
-        fpsBadge.textContent = `${isMotionPaused ? "PAUSED" : Math.min(120, Math.round(frames / acc)) + " FPS"} · THREE.Timer`;
+      if (fpsReadout) {
+        fpsReadout.textContent = `${isMotionPaused ? "PAUSED" : Math.min(120, Math.round(frames / acc)) + " FPS"} · THREE.Timer`;
       }
       frames = 0;
       acc = 0;
@@ -570,630 +332,254 @@ if (wrap3d) {
     if (!isMotionPaused) {
       if (jumpY > 0 || jumpVel !== 0) {
         jumpY += jumpVel;
-        jumpVel -= 0.009;
+        jumpVel -= 0.0085;
         if (jumpY <= 0) {
           jumpY = 0;
           jumpVel = 0;
         }
       }
-      spinVel *= 0.91;
+      spinBoost *= 0.91;
 
-      rootGroup.position.y = Math.sin(el * 2.3) * 0.12 + jumpY;
-      rootGroup.rotation.y += (targetRotY - rootGroup.rotation.y) * 0.08 + spinVel;
-      rootGroup.rotation.x += (targetRotX - rootGroup.rotation.x) * 0.08;
+      root.position.y = Math.sin(el * 2.2) * 0.1 + jumpY;
+      root.rotation.y += (targetY - root.rotation.y) * 0.08 + spinBoost;
+      root.rotation.x += (targetX - root.rotation.x) * 0.08;
 
-      earL.rotation.z = 0.28 + Math.sin(el * 3.6) * 0.09;
-      earR.rotation.z = -0.28 - Math.sin(el * 3.6 + 0.5) * 0.09;
-      tails.rotation.y = Math.sin(el * 2.9) * 0.24;
-      ringA.rotation.z = el * 0.55;
-      ringB.rotation.x = el * 0.42;
+      earL.rotation.z = 0.28 + Math.sin(el * 3.4) * 0.08;
+      earR.rotation.z = -0.28 - Math.sin(el * 3.4 + 0.5) * 0.08;
+      orbitA.rotation.z = el * 0.5;
+      orbitB.rotation.x = el * 0.38;
 
-      const blink = el % 3.8 > 3.66 ? 0.12 : 1.0;
+      const blink = el % 4.0 > 3.86 ? 0.15 : 1.0;
       eyeL.scale.y = blink;
       eyeR.scale.y = blink;
 
-      coreIco.rotation.y = el * 0.9;
-      coreIco.rotation.x = el * 0.55;
-      gRing1.rotation.x = el * 1.15;
-      gRing2.rotation.y = el * 0.85;
-      gRing3.rotation.z = el * 0.65;
+      centerCrystal.rotation.y = el * 0.85;
+      centerCrystal.rotation.x = el * 0.5;
+      ring1.rotation.x = el * 1.1;
+      ring2.rotation.y = el * 0.8;
+      ring3.rotation.z = el * 0.6;
+      satellites.forEach((sat, idx) => {
+        const r = 1.4 + Math.sin(el * 2.5 + idx) * 0.22;
+        const a = sat.userData.angle + el * 0.45;
+        sat.position.set(Math.cos(a) * r, Math.sin(a) * r, Math.sin(el * 2 + idx) * 0.3);
+        sat.rotation.y = el * 1.5;
+      });
     }
+
     renderer.render(scene, camera);
   });
 
   window.addEventListener(
     "resize",
     () => {
-      camera.aspect = wrap3d.clientWidth / wrap3d.clientHeight;
+      camera.aspect = stage3d.clientWidth / stage3d.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(wrap3d.clientWidth, wrap3d.clientHeight);
+      renderer.setSize(stage3d.clientWidth, stage3d.clientHeight);
     },
     { passive: true }
   );
 }
 
-// Chibi Operator Poke Interaction
-const chibiBtn = $("#btn-chibi-poke");
-const chibiStatus = $("#chibi-status-text");
-const chibiQuotes = [
-  "(*^▽^*) Halo! Semua 305 file sudah lolos verify.ps1!",
-  "(•̀ᴗ•́)و Gate scene_qa.py siap menjaga safe-area videomu!",
-  "(=^･ω･^=) Coba klik Kyo di pojok kanan bawah!",
-  "⚡ Mode fast/standard/deep jalan mulus di Hydrogen & Argon!",
-];
-let chibiIdx = 0;
-chibiBtn?.addEventListener("click", () => {
-  playSound("meow");
-  const img = chibiBtn.querySelector("img");
-  if (img) {
-    img.src = chibiIdx % 2 === 0 ? "./assets/projects/chibi-coding.png" : "./assets/projects/chibi-wave.png";
-  }
-  if (chibiStatus) {
-    chibiStatus.textContent = chibiQuotes[chibiIdx % chibiQuotes.length];
-  }
-  chibiIdx++;
-  trigger3DJump();
-});
-
 // ============================================================================
-// 5. WORD-BY-WORD SCRUB STATEMENT & HORIZONTAL PINNED CINEMA GALLERY
+// 3. BAB 02: 3-TIER SETUP KERJA AWAL SWITCHER
 // ============================================================================
-const scrubEl = $("#scrub-statement");
-if (scrubEl) {
-  const accentSet = new Set(["gate", "mesin:", "safe-area,", "305", "matematis"]);
-  const words = scrubEl.textContent.trim().split(/\s+/);
-  scrubEl.innerHTML = words
-    .map((w) => {
-      const cls = accentSet.has(w.toLowerCase()) ? "w is-accent" : "w";
-      return `<span class="${cls}">${w}</span>`;
-    })
-    .join(" ");
+const tierContent = {
+  tier1: {
+    title: "Lapis 01 // ~/.gemini/GEMINI.md (Global Workspace Rules)",
+    code: `<span class="hl-muted"># 1. Disiplin Rekayasa Kode (Karpathy Guardrails)</span>
+- <span class="hl-lime">Think Before Coding</span>: Periksa package.json / pyproject.toml nyata sebelum menulis import.
+- <span class="hl-lime">Simplicity First</span>: Tulis kode seminimal mungkin yang menyelesaikan masalah nyata, zero // TODO.
+- <span class="hl-lime">Surgical Changes</span>: Sentuh hanya file yang berkaitan dengan tugas, bersihkan import yatim.
 
-  const wordSpans = $$(".w", scrubEl);
-  if (hasGSAP && !reducedMotion) {
-    window.gsap.to(wordSpans, {
-      className: "+=is-lit",
-      stagger: 0.1,
-      ease: "none",
-      scrollTrigger: {
-        trigger: scrubEl,
-        start: "top 82%",
-        end: "bottom 52%",
-        scrub: 0.6,
-      },
-    });
-  } else {
-    wordSpans.forEach((w) => w.classList.add("is-lit"));
-  }
-}
-
-// Horizontal Pinned Cinema Track on Desktop (> 980px)
-const cinemaSection = $("#cinema");
-const cinemaTrack = $("#cinemaTrack");
-if (hasGSAP && cinemaSection && cinemaTrack && window.innerWidth > 980 && !reducedMotion) {
-  const getScrollDist = () => Math.max(0, cinemaTrack.scrollWidth - window.innerWidth + 80);
-  window.gsap.to(cinemaTrack, {
-    x: () => -getScrollDist(),
-    ease: "none",
-    scrollTrigger: {
-      trigger: cinemaSection,
-      start: "top top",
-      end: () => `+=${getScrollDist()}`,
-      pin: true,
-      scrub: 0.7,
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-    },
-  });
-}
-
-// Live Overlay Canvases inside Cinema Panels (Safe-Rect HUD & Wave HUD)
-(function initPanelCanvases() {
-  const c1 = $("#canvas-panel-01");
-  const c2 = $("#canvas-panel-02");
-  if (!c1 && !c2) return;
-
-  const setup = (c) => {
-    if (!c) return null;
-    const r = c.parentElement.getBoundingClientRect();
-    c.width = Math.max(300, Math.round(r.width));
-    c.height = Math.max(200, Math.round(r.height));
-    return c.getContext("2d");
-  };
-  const ctx1 = setup(c1);
-  const ctx2 = setup(c2);
-
-  let t = 0;
-  const drawOverlays = () => {
-    if (!isMotionPaused) {
-      t += 0.03;
-      if (ctx1 && c1) {
-        ctx1.clearRect(0, 0, c1.width, c1.height);
-        const scanY = ((Math.sin(t) * 0.5 + 0.5) * (c1.height - 40)) + 20;
-        ctx1.strokeStyle = "rgba(217, 255, 75, 0.65)";
-        ctx1.lineWidth = 1.5;
-        ctx1.beginPath();
-        ctx1.moveTo(0, scanY);
-        ctx1.lineTo(c1.width, scanY);
-        ctx1.stroke();
-
-        ctx1.strokeStyle = "rgba(0, 209, 178, 0.55)";
-        ctx1.setLineDash([5, 5]);
-        ctx1.strokeRect(24, 24, c1.width - 48, c1.height - 48);
-        ctx1.setLineDash([]);
-      }
-      if (ctx2 && c2) {
-        ctx2.clearRect(0, 0, c2.width, c2.height);
-        ctx2.strokeStyle = "rgba(217, 255, 75, 0.75)";
-        ctx2.lineWidth = 2;
-        ctx2.beginPath();
-        for (let x = 0; x < c2.width; x += 6) {
-          const y = c2.height - 38 + Math.sin(x * 0.03 + t * 2.2) * 14 * Math.sin(t);
-          if (x === 0) ctx2.moveTo(x, y);
-          else ctx2.lineTo(x, y);
-        }
-        ctx2.stroke();
-      }
-    }
-    requestAnimationFrame(drawOverlays);
-  };
-  requestAnimationFrame(drawOverlays);
-})();
-
-// ============================================================================
-// 6. FULL-VIEWPORT INTERACTIVE ANIMAL PLAYGROUND (KYO & KURO CHASING FISH!)
-// ============================================================================
-const petCanvas = $("#pet-playground-canvas");
-const kyoDialog = $("#kyo-dialog");
-const kyoSpeech = $("#kyo-speech");
-const kyoBadge = $("#kyo-badge");
-
-let spawnFishAt = () => {};
-
-if (petCanvas) {
-  const ctx = petCanvas.getContext("2d");
-  let W = window.innerWidth;
-  let H = window.innerHeight;
-
-  const resizePetCanvas = () => {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    petCanvas.width = W;
-    petCanvas.height = H;
-  };
-  resizePetCanvas();
-  window.addEventListener("resize", resizePetCanvas, { passive: true });
-
-  // Active fish treats and celebration particles
-  const fishes = [];
-  const sparks = [];
-  const floatTexts = [];
-
-  // Two autonomous studio pets that run along the bottom/screen when summoned!
-  const pets = [
-    {
-      name: "Kuro",
-      color: "#ffb020",
-      earColor: "#fde68a",
-      eyeColor: "#070709",
-      x: -90,
-      y: H - 28,
-      vx: 0,
-      vy: 0,
-      dir: 1,
-      active: false,
-      timer: 0,
-    },
-    {
-      name: "Mochi",
-      color: "#d9ff4b",
-      earColor: "#00d1b2",
-      eyeColor: "#070709",
-      x: W + 90,
-      y: H - 28,
-      vx: 0,
-      vy: 0,
-      dir: -1,
-      active: false,
-      timer: 0,
-    },
-  ];
-
-  const petMessages = [
-    "Nyam! 🐟 Kyo & Kuro barusan menangkap ikan! Gate scene_qa.py siap menjaga videomu tetap 60fps!",
-    "Purrr (=^･ω･^=) Tahukah kamu? Double-klik di titik mana saja di halaman ini untuk melempar ikan ke sana!",
-    "Hup! 🦊 Semua 305 file di paket Drive sudah dikunci dengan hash SHA-256 di verify.ps1!",
-    "Meow! 🐾 Komponen primitif UI-Modern dan Playwright E2E runner sekarang sudah ikut masuk di dalam paket!",
-  ];
-  let msgCounter = 0;
-
-  spawnFishAt = (tx, ty, customSpeech) => {
-    playSound("meow");
-    trigger3DJump();
-
-    if (kyoBadge) kyoBadge.textContent = "⚡ AKTIF!";
-    if (kyoDialog && kyoSpeech) {
-      kyoDialog.classList.remove("is-hidden");
-      kyoSpeech.textContent = customSpeech || petMessages[msgCounter % petMessages.length];
-      msgCounter++;
-    }
-
-    if (isMotionPaused) return;
-
-    fishes.push({
-      x: clamp(tx, 60, W - 60),
-      y: clamp(ty - 80, 60, H - 140),
-      vy: -4.5,
-      targetY: clamp(ty, 140, H - 36),
-      rot: 0,
-      caught: false,
-    });
-
-    pets.forEach((p, idx) => {
-      if (!p.active) {
-        p.active = true;
-        p.x = idx === 0 ? -40 : W + 40;
-        p.y = H - 28;
-      }
-      p.timer = 420; // Stay playful on screen for ~7 seconds
-    });
-  };
-
-  function drawOrigamiPet(ctx, p, time) {
-    ctx.save();
-    ctx.translate(p.x, p.y);
-    ctx.scale(p.dir, 1);
-
-    const bounce = Math.abs(Math.sin(time * 14)) * 6;
-    ctx.translate(0, -bounce);
-
-    // Tail wagging
-    const tailWag = Math.sin(time * 16) * 0.35;
-    ctx.save();
-    ctx.translate(-18, -12);
-    ctx.rotate(tailWag);
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(-18, -14);
-    ctx.lineTo(-10, 4);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    // Body
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.roundRect(-18, -24, 34, 20, 8);
-    ctx.fill();
-
-    // Running paws
-    const pawOffset = Math.sin(time * 18) * 6;
-    ctx.fillStyle = "#f3efe6";
-    ctx.fillRect(-14 + pawOffset, -5, 6, 6);
-    ctx.fillRect(8 - pawOffset, -5, 6, 6);
-
-    // Head
-    ctx.fillStyle = p.color;
-    ctx.beginPath();
-    ctx.arc(14, -24, 13, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Pointed Ears
-    ctx.fillStyle = p.earColor;
-    ctx.beginPath();
-    ctx.moveTo(6, -33);
-    ctx.lineTo(10, -47);
-    ctx.lineTo(17, -34);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(15, -33);
-    ctx.lineTo(22, -46);
-    ctx.lineTo(25, -31);
-    ctx.closePath();
-    ctx.fill();
-
-    // Eye
-    ctx.fillStyle = p.eyeColor;
-    ctx.beginPath();
-    ctx.arc(19, -25, 2.6, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Name tag above head
-    ctx.scale(p.dir, 1);
-    ctx.font = "700 10px 'JetBrains Mono', monospace";
-    ctx.fillStyle = "#d9ff4b";
-    ctx.textAlign = "center";
-    ctx.fillText(p.name, 0, -52);
-
-    ctx.restore();
-  }
-
-  let clock = 0;
-  const stepPlayground = () => {
-    ctx.clearRect(0, 0, W, H);
-    if (!isMotionPaused) {
-      clock += 0.016;
-
-      // Update fishes
-      for (let i = fishes.length - 1; i >= 0; i--) {
-        const f = fishes[i];
-        f.vy += 0.28;
-        f.y += f.vy;
-        f.rot += 0.08;
-        if (f.y > f.targetY) {
-          f.y = f.targetY;
-          f.vy = -Math.abs(f.vy) * 0.45;
-          if (Math.abs(f.vy) < 0.8) f.vy = 0;
-        }
-
-        ctx.save();
-        ctx.translate(f.x, f.y);
-        ctx.rotate(Math.sin(clock * 6) * 0.2);
-        ctx.font = "26px sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("🐟", 0, 0);
-        ctx.restore();
-      }
-
-      // Update pets chasing fishes
-      pets.forEach((p, idx) => {
-        if (!p.active) return;
-        p.timer--;
-
-        const targetFish = fishes[0];
-        if (targetFish) {
-          const dx = targetFish.x - p.x;
-          p.dir = dx >= 0 ? 1 : -1;
-          p.vx = lerp(p.vx, Math.sign(dx) * 7.5, 0.15);
-          p.x += p.vx;
-
-          // Jump up to catch fish when horizontally close!
-          if (Math.abs(dx) < 65 && p.y >= H - 32) {
-            p.vy = -13.5;
-          }
-          p.vy += 0.55;
-          p.y += p.vy;
-          if (p.y > H - 28) {
-            p.y = H - 28;
-            p.vy = 0;
-          }
-
-          // Check catch collision
-          const dist = Math.hypot(targetFish.x - p.x, targetFish.y - (p.y - 20));
-          if (dist < 46 || (Math.abs(dx) < 28 && Math.abs(p.y - targetFish.y) < 90)) {
-            playSound("catch");
-            for (let s = 0; s < 14; s++) {
-              const ang = (Math.PI * 2 * s) / 14;
-              sparks.push({
-                x: targetFish.x,
-                y: targetFish.y,
-                vx: Math.cos(ang) * (2.5 + Math.random() * 4),
-                vy: Math.sin(ang) * (2.5 + Math.random() * 4) - 2,
-                life: 1.0,
-                color: s % 2 === 0 ? "#d9ff4b" : "#ffb020",
-              });
-            }
-            floatTexts.push({
-              x: targetFish.x,
-              y: targetFish.y - 16,
-              text: `${p.name}: NYAM! +60 FPS (=^･ω･^=)`,
-              life: 1.0,
-            });
-            fishes.shift();
-          }
-        } else {
-          // Patrol or exit if timer done
-          const homeX = idx === 0 ? W * 0.35 : W * 0.65;
-          if (p.timer > 0) {
-            const patrolX = homeX + Math.sin(clock * 1.8 + idx * 2) * 140;
-            const dx = patrolX - p.x;
-            p.dir = dx >= 0 ? 1 : -1;
-            p.x += clamp(dx * 0.06, -4.5, 4.5);
-            p.vy += 0.55;
-            p.y = Math.min(H - 28, p.y + p.vy);
-          } else {
-            const exitX = idx === 0 ? -90 : W + 90;
-            const dx = exitX - p.x;
-            p.dir = dx >= 0 ? 1 : -1;
-            p.x += Math.sign(dx) * 6;
-            p.y = H - 28;
-            if (Math.abs(dx) < 12) {
-              p.active = false;
-              if (kyoBadge) kyoBadge.textContent = "Zzz";
-            }
-          }
-        }
-
-        drawOrigamiPet(ctx, p, clock + idx);
-      });
-
-      // Update sparks
-      for (let i = sparks.length - 1; i >= 0; i--) {
-        const sp = sparks[i];
-        sp.x += sp.vx;
-        sp.y += sp.vy;
-        sp.vy += 0.15;
-        sp.life -= 0.028;
-        if (sp.life <= 0) {
-          sparks.splice(i, 1);
-          continue;
-        }
-        ctx.fillStyle = sp.color;
-        ctx.globalAlpha = sp.life;
-        ctx.beginPath();
-        ctx.arc(sp.x, sp.y, 3.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-      }
-
-      // Update floating texts
-      for (let i = floatTexts.length - 1; i >= 0; i--) {
-        const ft = floatTexts[i];
-        ft.y -= 1.1;
-        ft.life -= 0.02;
-        if (ft.life <= 0) {
-          floatTexts.splice(i, 1);
-          continue;
-        }
-        ctx.save();
-        ctx.globalAlpha = ft.life;
-        ctx.font = "700 12px 'JetBrains Mono', monospace";
-        ctx.fillStyle = "#d9ff4b";
-        ctx.textAlign = "center";
-        ctx.fillText(ft.text, ft.x, ft.y);
-        ctx.restore();
-      }
-    }
-    requestAnimationFrame(stepPlayground);
-  };
-  requestAnimationFrame(stepPlayground);
-}
-
-// Triggers for Pet Surprise
-$("#btn-summon-pets")?.addEventListener("click", () => {
-  spawnFishAt(window.innerWidth * 0.5, window.innerHeight - 50);
-});
-$("#btn-hero-fish")?.addEventListener("click", () => {
-  spawnFishAt(window.innerWidth * 0.45, window.innerHeight - 60);
-});
-$("#btn-kyo-pet")?.addEventListener("click", () => {
-  spawnFishAt(window.innerWidth * 0.6, window.innerHeight - 50);
-});
-$("#btn-kyo-hide")?.addEventListener("click", () => {
-  kyoDialog?.classList.add("is-hidden");
-});
-
-// Double-click anywhere to drop a fish at cursor!
-window.addEventListener("dblclick", (e) => {
-  spawnFishAt(
-    e.clientX,
-    Math.max(160, e.clientY),
-    "Kejutan Double-Klik! 🐟 Kuro & Mochi langsung meluncur menangkap ikan di posisi klikmu!"
-  );
-});
-
-// Automatic surprise once when user scrolls into Section 01
-let autoSurpriseFired = false;
-window.addEventListener(
-  "scroll",
-  () => {
-    if (!autoSurpriseFired && window.scrollY > 420) {
-      autoSurpriseFired = true;
-      spawnFishAt(
-        window.innerWidth * 0.5,
-        window.innerHeight - 45,
-        "Kejutan! 🦊🐾 Kyo & Kuro bangun menyambutmu di Bab Filosofi & Gate Mesin!"
-      );
-    }
+<span class="hl-muted"># 2. Progressive Disclosure (On-Demand Skill Routing)</span>
+Jangan menumpuk seluruh instruksi di awal sesi. Muat SKILL.md hanya saat dipanggil:
+  • <span class="hl-teal">/architect</span>  -&gt; pro-architect (4-Layer Headless Engine vs UI)
+  • <span class="hl-teal">/ui-modern</span>  -&gt; ui-modern + design-md (Concentric Math &amp; 4-Layer Surface)
+  • <span class="hl-teal">/motionilo</span>  -&gt; motionilo + scene_qa.py (Programmatic Video &amp; Safe-Area Gate)
+  • <span class="hl-teal">web-motion</span>  -&gt; GSAP 3.13 + Lenis Single Ticker Loop
+  • <span class="hl-teal">threejs-dev</span> -&gt; Three.js r186 THREE.Timer &amp; WebGPU Shaders
+  • <span class="hl-teal">/rea</span>        -&gt; Clean-Room Forensic UI &amp; Motion Reconstruction`,
   },
-  { passive: true }
-);
+  tier2: {
+    title: "Lapis 02 // Arsitektur 4-Layer (/architect) & Modular SKILL.md",
+    code: `<span class="hl-muted"># Struktur 4-Layer Headless (pro-architect)</span>
+src/
+├── <span class="hl-lime">core/</span>        # LAYER 1: Headless Business Engine (TypeScript murni, zero UI)
+│   ├── engine/  # State machine, kalkulasi matematika, model komputasi
+│   └── store/   # Transactional store / signals 60fps
+├── <span class="hl-teal">services/</span>    # LAYER 2: I/O &amp; External Adapters (API, Storage)
+├── <span class="hl-amber">features/</span>    # LAYER 3: Colocated Feature Slices (Components + Hooks)
+└── <span class="hl-lime">shared/</span>      # LAYER 4: Design System Primitives &amp; Tokens
 
-// ============================================================================
-// 7. WORKBENCHES (SCENE_QA.PY LIVE SIMULATOR, CONCENTRIC MATH, REA X-RAY, DRIVE)
-// ============================================================================
-$$("[data-wb]").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    playSound("tick");
-    const target = tab.getAttribute("data-wb");
-    $$("[data-wb]").forEach((t) => t.classList.toggle("active", t === tab));
-    $$(".wb-panel").forEach((p) => p.classList.toggle("active", p.id === target));
+<span class="hl-muted"># Kontrak Mode Eksekusi di Setiap SKILL.md:</span>
+mode: <span class="hl-lime">fast</span> | <span class="hl-teal">standard</span> | <span class="hl-amber">deep</span>
+- fast     : &le; 1 komponen, gunakan starter mandiri di SKILL.md (0 file referensi dibuka)
+- standard : 1 halaman / video &le; 30s, muat 1-2 file referensi terkait
+- deep     : multi-scene / multi-section, wajib jalankan gate scene_qa.py &amp; verify.ps1`,
+  },
+  tier3: {
+    title: "Lapis 03 // project/DESIGN.md (Visual System Specification)",
+    code: `<span class="hl-muted">---</span>
+<span class="hl-lime">colors:</span>
+  canvas: "#08090d"
+  surface-1: "#101219"
+  surface-2: "#161923"
+  hairline: "rgba(244, 242, 237, 0.08)"
+  primary: "#e2ff54"
+  secondary: "#2dd4bf"
+<span class="hl-lime">geometry:</span>
+  concentric-rule: "R_inner = max(0, R_outer - Padding)"
+  tactile-press: "50ms cubic-bezier(0.16, 1, 0.3, 1) scale(0.97)"
+<span class="hl-muted">---</span>
+<span class="hl-teal"># Aturan Disiplin Visual:</span>
+1. Dilarang mengarang warna hex di luar variabel CSS root.
+2. Semua angka dinamis &amp; metrik wajib memakai font-variant-numeric: tabular-nums.
+3. Tersedia 7 preset siap pakai: Linear, Vercel, Apple, Raycast, Claude, PostHog, CAD.`,
+  },
+};
+
+$$("[data-tier]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    playTone("click");
+    const key = btn.getAttribute("data-tier");
+    const item = tierContent[key];
+    if (!item) return;
+    $$("[data-tier]").forEach((b) => b.classList.toggle("active", b === btn));
+    $("#tier-window-title").textContent = item.title;
+    $("#tier-window-code").innerHTML = item.code;
   });
 });
 
-// Workbench 1: scene_qa.py & storyboard.py Patuh vs Cacat
-const qaTerm = $("#qa-terminal-out");
-const sbImg = $("#storyboard-preview-img");
-const sbStage = $("#storyboard-preview-stage");
-const sbCap = $("#storyboard-caption-tag");
+// ============================================================================
+// 4. BAB 03: LIVE PROCEDURAL MOTION GRAPHICS PLAYER & INTERACTIVE LABS
+// ============================================================================
+const mgViewport = $("#mg-viewport");
+const mgSafeGuide = $("#mg-safe-guide");
+const mgRatioTag = $("#mg-ratio-tag");
+const mgBgOrb = $("#mg-bg-orb");
+const mgMidCard = $("#mg-mid-card");
+const mgBeatLabel = $("#mg-beat-label");
+const mgHeadline = $("#mg-headline");
+const mgSubtitle = $("#mg-subtitle");
+const mgScrubber = $("#mg-scrubber");
+const mgFrameReadout = $("#mg-frame-readout");
+const mgPlayBtn = $("#btn-mg-play");
+const mgBars = $$("#mg-bars .mograph-bar");
 
-$("#btn-run-patuh")?.addEventListener("click", () => {
-  playSound("catch");
-  if (qaTerm) {
-    qaTerm.innerHTML = `<span class="t-cmd">$ python scene_qa.py demo-patuh.json</span>
-<span class="t-pass">LULUS  demo-patuh.json  (47 pemeriksaan)</span>
-  ✓ aspect_ratio 9:16 (1080x1920 @ 30fps)
-  ✓ S01..S03 durasi 3.0s, 4.0s, 3.0s (dalam rentang 1.5s..6.0s)
-  ✓ Semua text_rect berada di dalam zona aman TikTok/Reels [108, 380, 900, 1440]
-  ✓ Ukuran font 72px, 56px, 64px (&ge; minimum 54px)
-  ✓ Kontras warna #F5F7FF di atas #0B1020 = 17.42:1 (&ge; 4.5:1 WCAG AA)
-  ✓ Subtitle CPS = 7.4 char/s (&le; 20.0), 0 cue tumpang tindih
-  <span class="t-pass">exit code: 0 (AMAN UNTUK RENDER REMOTION)</span>`;
-  }
-  if (sbImg) sbImg.src = "./assets/projects/storyboard-patuh.png";
-  if (sbStage) sbStage.setAttribute("data-lightbox", "./assets/projects/storyboard-patuh.png");
-  if (sbCap) {
-    sbCap.textContent = "OUTPUT NYATA STORYBOARD.PY (DEMO-PATUH.PNG)";
-    sbCap.style.color = "var(--teal)";
-  }
+const ratioConfigs = {
+  "9:16": { w: "175px", h: "245px", inset: "12% 10% 20% 10%", label: "9:16" },
+  "16:9": { w: "285px", h: "165px", inset: "8% 6% 16% 6%", label: "16:9" },
+  "1:1":  { w: "215px", h: "215px", inset: "8% 8% 16% 8%", label: "1:1" },
+};
+
+$$("[data-ratio]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    playTone("click");
+    const r = btn.getAttribute("data-ratio");
+    const cfg = ratioConfigs[r];
+    if (!cfg) return;
+    $$("[data-ratio]").forEach((b) => b.classList.toggle("btn--primary", b === btn));
+    if (mgViewport) {
+      mgViewport.style.width = cfg.w;
+      mgViewport.style.height = cfg.h;
+    }
+    if (mgSafeGuide) mgSafeGuide.style.inset = cfg.inset;
+    if (mgRatioTag) mgRatioTag.textContent = cfg.label;
+  });
 });
 
-$("#btn-run-cacat")?.addEventListener("click", () => {
-  playSound("fail");
-  if (qaTerm) {
-    qaTerm.innerHTML = `<span class="t-cmd">$ python scene_qa.py demo-cacat.json</span>
-<span class="t-fail">GAGAL  demo-cacat.json  (16 CRITICAL FAIL ditemukan)</span>
-  <span class="t-fail">CRITICAL</span>  S01: durasi 1.00s &lt; minimum 1.5s
-  <span class="t-fail">CRITICAL</span>  S01: text_rect [20, 100, 1060, 1880] keluar platform text rect [108, 380, 900, 1440]
-  <span class="t-fail">CRITICAL</span>  S01: ukuran teks 28px &lt; minimum 54px (9:16)
-  <span class="t-fail">CRITICAL</span>  S01: in memakai linear tanpa justifikasi
-  <span class="t-fail">CRITICAL</span>  S02: start 20 menimpa scene sebelumnya (cursor 30)
-  <span class="t-fail">CRITICAL</span>  palet 7 warna &gt; maksimum 5
-  <span class="t-fail">CRITICAL</span>  kontras teks 1.84:1 &lt; 4.5:1
-  <span class="t-fail">CRITICAL</span>  cue 1: CPS 31.2 &gt; 20.0
-  <span class="t-fail">exit code: 1 (RENDER DIBLOKIR OLEH GATE MESIN)</span>`;
-  }
-  if (sbImg) sbImg.src = "./assets/projects/storyboard-cacat.png";
-  if (sbStage) sbStage.setAttribute("data-lightbox", "./assets/projects/storyboard-cacat.png");
-  if (sbCap) {
-    sbCap.textContent = "OUTPUT STORYBOARD.PY: PELANGGARAN DITANDAI MERAH (DEMO-CACAT.PNG)";
-    sbCap.style.color = "var(--coral)";
-  }
-});
+let mgPlaying = true;
+let mgFrame = 0;
 
-// Workbench 2: Concentric Radius & Easing Race
-const rngRouter = $("#rng-router");
-const rngPad = $("#rng-pad");
-function updateConcentric() {
-  const ro = parseInt(rngRouter.value, 10);
-  const pd = parseInt(rngPad.value, 10);
-  const ri = Math.max(0, ro - pd);
-  $("#lbl-router").textContent = `${ro}px`;
-  $("#lbl-pad").textContent = `${pd}px`;
-  $("#lbl-rinner").textContent = `${ri}px`;
-  const bo = $("#box-router");
-  const bi = $("#box-rinner");
-  if (bo) {
-    bo.style.borderRadius = `${ro}px`;
-    bo.style.padding = `${pd}px`;
+function renderMographFrame(f) {
+  const norm = f / 300;
+  if (mgFrameReadout) mgFrameReadout.textContent = `F: ${String(f).padStart(3, "0")} / 300`;
+  if (mgScrubber && document.activeElement !== mgScrubber) mgScrubber.value = String(f);
+
+  // 3-Beat Scene Progression
+  if (f < 100) {
+    if (mgBeatLabel) mgBeatLabel.textContent = "SCENE 01 // HOOK (0.0s - 3.3s)";
+    if (mgHeadline) mgHeadline.textContent = "Ritme Visual Terukur";
+    if (mgSubtitle) mgSubtitle.textContent = "Safe-Area terkunci otomatis";
+  } else if (f < 200) {
+    if (mgBeatLabel) mgBeatLabel.textContent = "SCENE 02 // DATA (3.3s - 6.6s)";
+    if (mgHeadline) mgHeadline.textContent = "3-Plane Depth Parallax";
+    if (mgSubtitle) mgSubtitle.textContent = "Kontras >= 4.5:1 & Spring Damping 20";
+  } else {
+    if (mgBeatLabel) mgBeatLabel.textContent = "SCENE 03 // CTA (6.6s - 10.0s)";
+    if (mgHeadline) mgHeadline.textContent = "Lolos Gate scene_qa.py";
+    if (mgSubtitle) mgSubtitle.textContent = "Siap Render MP4 60fps di Remotion v4";
   }
-  if (bi) {
-    bi.style.borderRadius = `${ri}px`;
-    bi.innerHTML = `R_inner = <strong style="color:var(--lime);">${ri}px</strong> (${ro}px - ${pd}px) · Sudut Konsentris Presisi`;
+
+  const wave = Math.sin(norm * Math.PI * 4);
+  if (mgBgOrb) {
+    mgBgOrb.style.transform = `translate(${(wave * 18).toFixed(1)}px, ${(Math.cos(norm * Math.PI * 2) * 12).toFixed(1)}px)`;
   }
+  if (mgMidCard) {
+    mgMidCard.style.transform = `translateY(${(Math.sin(norm * Math.PI * 2) * -4).toFixed(1)}px)`;
+  }
+  mgBars.forEach((bar, i) => {
+    const h = 28 + Math.abs(Math.sin(norm * Math.PI * 3 + i * 0.7)) * 68;
+    bar.style.height = `${h.toFixed(0)}%`;
+  });
 }
-rngRouter?.addEventListener("input", updateConcentric);
-rngPad?.addEventListener("input", updateConcentric);
 
-$("#btn-race-start")?.addEventListener("click", () => {
-  playSound("catch");
-  const pLin = $("#puck-lin");
-  const pSnap = $("#puck-snappy");
-  const pSpr = $("#puck-spr");
-  if (!pLin || !pSnap || !pSpr) return;
-  const dist = pLin.parentElement.clientWidth - 54;
+mgPlayBtn?.addEventListener("click", () => {
+  playTone("click");
+  mgPlaying = !mgPlaying;
+  mgPlayBtn.textContent = mgPlaying ? "⏸ Pause" : "▶ Play";
+});
+
+mgScrubber?.addEventListener("input", () => {
+  mgFrame = parseInt(mgScrubber.value, 10) || 0;
+  renderMographFrame(mgFrame);
+});
+
+setInterval(() => {
+  if (!isMotionPaused && mgPlaying) {
+    mgFrame = (mgFrame + 1) % 301;
+    renderMographFrame(mgFrame);
+  }
+}, 40);
+
+// Concentric Radius Calculator
+const inpROut = $("#inp-r-out");
+const inpPad = $("#inp-pad");
+function updateConcentric() {
+  const ro = parseInt(inpROut.value, 10);
+  const pd = parseInt(inpPad.value, 10);
+  const ri = Math.max(0, ro - pd);
+  $("#val-r-out").textContent = `${ro}px`;
+  $("#val-pad").textContent = `${pd}px`;
+  $("#val-r-in").textContent = `${ri}px`;
+  $("#calc-formula-badge").textContent = `${ro}px - ${pd}px = ${ri}px`;
+  const outer = $("#demo-outer");
+  const inner = $("#demo-inner");
+  if (outer) {
+    outer.style.borderRadius = `${ro}px`;
+    outer.style.padding = `${pd}px`;
+  }
+  if (inner) inner.style.borderRadius = `${ri}px`;
+}
+inpROut?.addEventListener("input", updateConcentric);
+inpPad?.addEventListener("input", updateConcentric);
+
+// Easing Race Lab
+$("#btn-run-easing")?.addEventListener("click", () => {
+  playTone("chime");
+  const pLin = $("#puck-linear");
+  const pExp = $("#puck-expo");
+  const pSpr = $("#puck-spring");
+  if (!pLin || !pExp || !pSpr) return;
+  const dist = pLin.parentElement.clientWidth - 46;
 
   pLin.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
-    duration: 950,
+    duration: 920,
     easing: "linear",
     fill: "forwards",
   });
-  pSnap.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
-    duration: 950,
+  pExp.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
+    duration: 920,
     easing: "cubic-bezier(0.16, 1, 0.3, 1)",
     fill: "forwards",
   });
@@ -1204,149 +590,386 @@ $("#btn-race-start")?.addEventListener("click", () => {
       { transform: `translateX(${dist * 0.985}px)`, offset: 0.86 },
       { transform: `translateX(${dist}px)`, offset: 1 },
     ],
-    { duration: 950, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
+    { duration: 920, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
   );
 });
 
-// Workbench 3: REA Forensic X-Ray
-const rngXray = $("#rng-xray");
-const xrayPane = $("#xray-pane");
-const lblXray = $("#lbl-xray");
-rngXray?.addEventListener("input", () => {
-  const v = parseInt(rngXray.value, 10);
-  if (xrayPane) xrayPane.style.clipPath = `inset(0 0 0 ${100 - v}%)`;
-  if (lblXray) lblXray.textContent = `${v}%`;
+// REA Forensic X-Ray Slider
+const inpXray = $("#inp-xray");
+const valXray = $("#val-xray");
+const xrayCodeLayer = $("#xray-code-layer");
+inpXray?.addEventListener("input", () => {
+  const v = parseInt(inpXray.value, 10);
+  if (valXray) valXray.textContent = `${v}%`;
+  if (xrayCodeLayer) xrayCodeLayer.style.clipPath = `inset(0 0 0 ${100 - v}%)`;
 });
 
-// Section 04: Drive Explorer
-const driveContents = {
-  d00: `Perintah Instan untuk Dikirim Pembeli ke AI-nya:
-"Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu jalankan instalasi seluruh skill dan bonus setup-nya ke direktori konfigurasi Antigravity milikku serta verifikasi hasilnya dengan verify.ps1."
+// ============================================================================
+// 5. BAB 05: DRIVE PACKAGE EXPLORER & COPY AI COMMAND
+// ============================================================================
+const pkgData = {
+  p00: {
+    title: "drive-package // 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md",
+    body: `Perintah 1-Baris untuk Dikirim ke AI:
+"Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu pasangkan setup kerjaan awal serta seluruh skill visual dan web-nya ke lingkunganku."
 
-Hasil Eksekusi Otomatis:
-$ powershell -ExecutionPolicy Bypass -File ./06-Bonus-Setup-Utama-Arsitektur-Global/install-all.ps1
-Instalasi selesai. Menjalankan verifikasi SHA-256 (verify.ps1)...
-VERIFY PASS: 305/305 file cocok 100% (SHA-256 verified, 0 missing, 0 drift).`,
-
-  d01: `01-Setup-Motion-Graphics-Motionilo/
+Struktur Paket Lengkap:
+├── 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md
+├── 01-Setup-Motion-Graphics-Motionilo/
+├── 02-Setup-Web-Motion-Choreography/
+├── 03-Setup-UI-Modern-Design-System/
+├── 04-Setup-3D-WebGL-ThreeJS/
+├── 05-Setup-Reverse-Engineering-REA/
+└── 06-Bonus-Setup-Utama-Arsitektur-Global/`,
+  },
+  p06: {
+    title: "drive-package // 06-Bonus-Setup-Utama-Arsitektur-Global",
+    body: `06-Bonus-Setup-Utama-Arsitektur-Global/
+├── SETUP-DAN-PANDUAN-AI.md
+├── GEMINI-GLOBAL-RULES.md         (Aturan global &amp; progressive skill routing)
+├── DAFTAR-KURASI-PLUGIN-PENDUKUNG.md
+├── plugins.manifest.json          (Manifest hash SHA-256 seluruh file)
+├── install-all.ps1                (Installer otomatis 1-klik)
+├── verify.ps1                     (Verifikasi integritas SHA-256)
+├── uninstall.ps1                  (Pembersih terukur)
+├── pro-architect/                 (Skill /architect 4-layer headless)
+└── dialectic-architect/           (Skill pengujian arsitektur multi-agen)`,
+  },
+  p01: {
+    title: "drive-package // 01-Setup-Motion-Graphics-Motionilo",
+    body: `01-Setup-Motion-Graphics-Motionilo/
 ├── SETUP-DAN-PANDUAN-AI.md
 ├── motionilo/
 │   ├── plugin.json
 │   ├── scripts/
-│   │   ├── scene_qa.py          (Gate 47 pemeriksaan matematis)
-│   │   ├── storyboard.py        (Generator contact sheet PNG)
-│   │   ├── verify_png.py        (Verifikasi piksel numerik)
-│   │   ├── demo-patuh.json      (Contoh manifest LULUS)
-│   │   └── demo-cacat.json      (Contoh manifest 16 CRITICAL FAIL)
-│   └── skills/motionilo/        (SKILL.md + types + shared + templates)
-└── remotion-best-practices/     (Bebas duplikasi 488 KB)`,
-
-  d02: `02-Setup-Web-Motion-Choreography/
+│   │   ├── scene_qa.py            (Validator 47 aturan safe-rect, durasi, kontras, CPS)
+│   │   └── storyboard.py          (Generator pratinjau zona aman PNG)
+│   └── skills/motionilo/
+│       ├── SKILL.md               (Mode fast, standard, deep)
+│       ├── types/                 (01-story, 02-kinetic, 03-brand)
+│       ├── shared/                (01-safearea s.d. 07-qa-checklist)
+│       └── templates/             (Scene &amp; SRT subtitle templates)
+└── remotion-best-practices/       (Router teknis Remotion v4)`,
+  },
+  p02: {
+    title: "drive-package // 02-Setup-Web-Motion-Choreography",
+    body: `02-Setup-Web-Motion-Choreography/
 ├── SETUP-DAN-PANDUAN-AI.md
 └── motion-stack/
-    ├── plugin.json              (Atribusi bersih & versi 2.1.0)
+    ├── plugin.json
     └── skills/web-motion/
-        ├── SKILL.md             (Observable mode: fast | standard | deep)
-        ├── references/          (GSAP 3.13+, ScrollTrigger, Lenis, 60fps, OKLCH)
-        ├── examples/            (hero-timeline.js, standalone-template.html)
-        └── scripts/media_verify.py (Auto FFmpeg/FFprobe discovery lintas OS)`,
-
-  d03: `03-Setup-UI-Modern-Design-System/
+        ├── SKILL.md               (Starter GSAP 3.13 + Lenis Single Ticker Loop)
+        ├── references/            (ScrollTrigger, SplitText, Flip, 60fps, OKLCH)
+        ├── examples/              (hero-timeline.js, standalone-template.html)
+        └── scripts/media_verify.py (Inspeksi FPS &amp; resolusi video via FFprobe)`,
+  },
+  p03: {
+    title: "drive-package // 03-Setup-UI-Modern-Design-System",
+    body: `03-Setup-UI-Modern-Design-System/
 ├── SETUP-DAN-PANDUAN-AI.md
 ├── ui-modern/
-│   ├── plugin.json              (v2.1.0)
-│   ├── primitives-kit/          (BUNDLED: 7 Komponen Primitif + Playwright E2E)
-│   │   ├── components/          (SurfaceCard, TactileButton, MagneticButton, dll.)
-│   │   ├── tokens.css & motion/
-│   │   └── test-bench/e2e-runner.js
-│   └── skills/ui-modern/SKILL.md
+│   ├── plugin.json
+│   ├── primitives-kit/            (7 Komponen Primitif + Playwright E2E Runner)
+│   └── skills/ui-modern/
+│       ├── SKILL.md               (Token CSS mandiri, Concentric Math, 50ms Physics)
+│       └── references/            (spatial-math, motion-physics, color-elevation)
 └── design-md/
-    └── references/presets/      (linear, vercel, apple, raycast, claude, posthog, cad)`,
-
-  d04: `04-Setup-3D-WebGL-ThreeJS/
+    ├── SKILL.md
+    └── references/presets/        (linear, vercel, apple, raycast, claude, posthog, cad)`,
+  },
+  p04: {
+    title: "drive-package // 04-Setup-3D-WebGL-ThreeJS",
+    body: `04-Setup-3D-WebGL-ThreeJS/
 ├── SETUP-DAN-PANDUAN-AI.md
 └── threejs-dev/
     ├── plugin.json
     └── skills/threejs-dev/
-        ├── SKILL.md             (Three.js r186 THREE.Timer, HDRLoader, WebGPU)
-        └── references/          (13 modul: shaders, lighting, r3f, asset-pipeline)`,
-
-  d05: `05-Setup-Reverse-Engineering-REA/
+        ├── SKILL.md               (Three.js r186 THREE.Timer, HDRLoader, WebGPU)
+        └── references/            (13 modul: shaders, lighting, r3f, asset-pipeline)`,
+  },
+  p05: {
+    title: "drive-package // 05-Setup-Reverse-Engineering-REA",
+    body: `05-Setup-Reverse-Engineering-REA/
 ├── SETUP-DAN-PANDUAN-AI.md
 └── rea/
     ├── plugin.json
     ├── scripts/extract_animation.py
     └── skills/rea/
-        ├── SKILL.md             (Mode fast 1-pass & deep 5-phase forensics)
-        └── references/          (web-animation-extraction, clean-room-synthesis)`,
-
-  d06: `06-Bonus-Setup-Utama-Arsitektur-Global/
-├── SETUP-DAN-PANDUAN-AI.md
-├── GEMINI-GLOBAL-RULES.md       (0 em-dash, Karpathy guardrails, on-demand routing)
-├── plugins.manifest.json        (305 file dengan hash SHA-256 eksak)
-├── install-all.ps1              (Installer idempoten + auto-verify)
-├── verify.ps1                   (Gate verifikasi SHA-256, exit 0 jika 100% cocok)
-├── uninstall.ps1                (Pembersih terukur berbasis manifest)
-├── pro-architect/               (/architect 4-layer headless engine)
-└── dialectic-architect/         (Adversarial Triad architecture)`,
+        ├── SKILL.md               (Ekstraksi 1-putaran &amp; 5 fase forensik clean-room)
+        └── references/            (web-animation-extraction, clean-room-synthesis)`,
+  },
 };
 
-$$("[data-drive]").forEach((btn) => {
+$$("[data-pkg]").forEach((btn) => {
   btn.addEventListener("click", () => {
-    playSound("tick");
-    const key = btn.getAttribute("data-drive");
-    $$("[data-drive]").forEach((b) => b.classList.toggle("active", b === btn));
-    const body = $("#drive-term-body");
-    if (body && driveContents[key]) body.textContent = driveContents[key];
+    playTone("click");
+    const key = btn.getAttribute("data-pkg");
+    const info = pkgData[key];
+    if (!info) return;
+    $$("[data-pkg]").forEach((b) => b.classList.toggle("active", b === btn));
+    $("#pkg-window-title").textContent = info.title;
+    $("#pkg-window-body").innerHTML = info.body;
   });
 });
 
-$("#btn-copy-prompt")?.addEventListener("click", async (e) => {
-  playSound("catch");
-  const txt =
-    "Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu jalankan instalasi seluruh skill dan bonus setup-nya ke direktori konfigurasi Antigravity milikku serta verifikasi hasilnya dengan verify.ps1.";
+$("#btn-copy-ai-cmd")?.addEventListener("click", async (e) => {
+  playTone("chime");
+  const cmd =
+    "Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu pasangkan setup kerjaan awal serta seluruh skill visual dan web-nya ke lingkunganku.";
   try {
-    await navigator.clipboard.writeText(txt);
-    const span = e.currentTarget.querySelector("span");
-    if (span) {
-      const orig = span.textContent;
-      span.textContent = "✓ Perintah Setup AI Tersalin!";
-      setTimeout(() => (span.textContent = orig), 2000);
-    }
+    await navigator.clipboard.writeText(cmd);
+    const btn = e.currentTarget;
+    const orig = btn.textContent;
+    btn.textContent = "✓ Perintah Setup Tersalin!";
+    setTimeout(() => (btn.textContent = orig), 1800);
   } catch {
-    // Ignore clipboard fallback
+    // Ignore clipboard restriction
   }
 });
 
-// Lightbox Modal
-const lightbox = $("#lightbox");
-const lightboxImg = $("#lightbox-img");
-const lightboxCap = $("#lightbox-cap");
+// ============================================================================
+// 6. COHESIVE ORIGAMI FOX PLAYGROUND (SURPRISE COMPANION)
+// ============================================================================
+const foxCanvas = $("#fox-playground-canvas");
+const foxBubble = $("#fox-bubble");
+const foxSpeech = $("#fox-speech");
 
-$$("[data-lightbox]").forEach((el) => {
-  el.addEventListener("click", () => {
-    playSound("tick");
-    const src = el.getAttribute("data-lightbox");
-    const cap = el.getAttribute("data-caption");
-    if (lightbox && lightboxImg && src) {
-      lightboxImg.src = src;
-      if (lightboxCap) lightboxCap.textContent = cap || "Preview";
-      lightbox.showModal();
+let summonFoxSurprise = () => {};
+
+if (foxCanvas) {
+  const ctx = foxCanvas.getContext("2d");
+  let W = window.innerWidth;
+  let H = window.innerHeight;
+  const resize = () => {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    foxCanvas.width = W;
+    foxCanvas.height = H;
+  };
+  resize();
+  window.addEventListener("resize", resize, { passive: true });
+
+  const orbs = [];
+  const sparks = [];
+  const fox = {
+    x: -80,
+    y: H - 24,
+    vx: 0,
+    vy: 0,
+    dir: 1,
+    active: false,
+    timer: 0,
+  };
+
+  const tips = [
+    "Kejutan! 🦊 Setup 3-Tier di Bab 02 menjaga agar AI kamu tidak mengarang dependensi atau memboroskan token.",
+    "Tahukah kamu? Semua simulasi di Bab 03 dirender 100% secara live dengan kode, bukan gambar tempelan!",
+    "Double-klik di titik mana saja di layar untuk melempar Orb Energi ke arahku!",
+    "Skill ini otomatis menyesuaikan mode fast, standard, atau deep baik di Gemini Hydrogen maupun Argon.",
+  ];
+  let tipIdx = 0;
+
+  summonFoxSurprise = (tx, ty, customText) => {
+    playTone("chime");
+    pulse3D();
+
+    if (foxBubble && foxSpeech) {
+      foxBubble.classList.remove("is-hidden");
+      foxSpeech.textContent = customText || tips[tipIdx % tips.length];
+      tipIdx++;
     }
-  });
+
+    if (isMotionPaused) return;
+
+    orbs.push({
+      x: clamp(tx, 60, W - 60),
+      y: clamp(ty - 60, 60, H - 120),
+      vy: -4,
+      targetY: clamp(ty, 140, H - 34),
+    });
+
+    if (!fox.active) {
+      fox.active = true;
+      fox.x = -40;
+      fox.y = H - 24;
+    }
+    fox.timer = 340;
+  };
+
+  function drawGeometricFox(ctx, f, t) {
+    ctx.save();
+    ctx.translate(f.x, f.y);
+    ctx.scale(f.dir, 1);
+    const hop = Math.abs(Math.sin(t * 14)) * 5;
+    ctx.translate(0, -hop);
+
+    // Tail
+    ctx.save();
+    ctx.translate(-16, -12);
+    ctx.rotate(Math.sin(t * 15) * 0.3);
+    ctx.fillStyle = "#f59e0b";
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(-18, -12);
+    ctx.lineTo(-10, 4);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    // Body
+    ctx.fillStyle = "#f59e0b";
+    ctx.beginPath();
+    ctx.roundRect(-16, -22, 32, 18, 7);
+    ctx.fill();
+
+    // Head
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    ctx.moveTo(6, -34);
+    ctx.lineTo(26, -24);
+    ctx.lineTo(12, -12);
+    ctx.closePath();
+    ctx.fill();
+
+    // Ears
+    ctx.fillStyle = "#e2ff54";
+    ctx.beginPath();
+    ctx.moveTo(8, -32);
+    ctx.lineTo(13, -45);
+    ctx.lineTo(19, -31);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  let t = 0;
+  const loop = () => {
+    ctx.clearRect(0, 0, W, H);
+    if (!isMotionPaused) {
+      t += 0.016;
+
+      for (let i = orbs.length - 1; i >= 0; i--) {
+        const o = orbs[i];
+        o.vy += 0.25;
+        o.y += o.vy;
+        if (o.y > o.targetY) {
+          o.y = o.targetY;
+          o.vy = -Math.abs(o.vy) * 0.45;
+        }
+        ctx.fillStyle = "#e2ff54";
+        ctx.beginPath();
+        ctx.arc(o.x, o.y, 7, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      if (fox.active) {
+        fox.timer--;
+        const target = orbs[0];
+        if (target) {
+          const dx = target.x - fox.x;
+          fox.dir = dx >= 0 ? 1 : -1;
+          fox.vx = lerp(fox.vx, Math.sign(dx) * 7.2, 0.16);
+          fox.x += fox.vx;
+
+          if (Math.abs(dx) < 60 && fox.y >= H - 28) {
+            fox.vy = -13;
+          }
+          fox.vy += 0.55;
+          fox.y = Math.min(H - 24, fox.y + fox.vy);
+
+          if (Math.hypot(target.x - fox.x, target.y - (fox.y - 18)) < 42) {
+            playTone("chime");
+            for (let s = 0; s < 12; s++) {
+              const a = (Math.PI * 2 * s) / 12;
+              sparks.push({
+                x: target.x,
+                y: target.y,
+                vx: Math.cos(a) * 3.5,
+                vy: Math.sin(a) * 3.5 - 1.5,
+                life: 1.0,
+              });
+            }
+            orbs.shift();
+          }
+        } else if (fox.timer > 0) {
+          const patrolX = W * 0.5 + Math.sin(t * 1.6) * 140;
+          const dx = patrolX - fox.x;
+          fox.dir = dx >= 0 ? 1 : -1;
+          fox.x += clamp(dx * 0.05, -4, 4);
+          fox.vy += 0.55;
+          fox.y = Math.min(H - 24, fox.y + fox.vy);
+        } else {
+          fox.dir = -1;
+          fox.x -= 6;
+          fox.y = H - 24;
+          if (fox.x < -70) fox.active = false;
+        }
+        drawGeometricFox(ctx, fox, t);
+      }
+
+      for (let i = sparks.length - 1; i >= 0; i--) {
+        const sp = sparks[i];
+        sp.x += sp.vx;
+        sp.y += sp.vy;
+        sp.life -= 0.035;
+        if (sp.life <= 0) {
+          sparks.splice(i, 1);
+          continue;
+        }
+        ctx.fillStyle = "#e2ff54";
+        ctx.globalAlpha = sp.life;
+        ctx.beginPath();
+        ctx.arc(sp.x, sp.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+}
+
+$("#btn-nav-fox")?.addEventListener("click", () => {
+  summonFoxSurprise(window.innerWidth * 0.5, window.innerHeight - 50);
 });
-$("#btn-lightbox-close")?.addEventListener("click", () => lightbox?.close());
-lightbox?.addEventListener("click", (e) => {
-  if (e.target === lightbox) lightbox.close();
+$("#btn-hero-orb")?.addEventListener("click", () => {
+  summonFoxSurprise(window.innerWidth * 0.55, window.innerHeight - 60);
+});
+$("#btn-fox-dock")?.addEventListener("click", () => {
+  summonFoxSurprise(window.innerWidth * 0.45, window.innerHeight - 50);
+});
+$("#btn-fox-close")?.addEventListener("click", () => {
+  foxBubble?.classList.add("is-hidden");
+});
+window.addEventListener("dblclick", (e) => {
+  summonFoxSurprise(e.clientX, Math.max(150, e.clientY));
 });
 
-// Theme & Motion Pause Controls
-$("#btn-theme")?.addEventListener("click", (e) => {
-  playSound("tick");
+// Auto-trigger once when scrolling into Bab 02
+let scrollSurpriseDone = false;
+window.addEventListener(
+  "scroll",
+  () => {
+    if (!scrollSurpriseDone && window.scrollY > 480) {
+      scrollSurpriseDone = true;
+      summonFoxSurprise(
+        window.innerWidth * 0.5,
+        window.innerHeight - 45,
+        "Hup! 🦊 Kamu masuk ke Bab Setup Kerjaan Awal (3-Tier Architecture). Klik tiap lapis untuk melihat isinya!"
+      );
+    }
+  },
+  { passive: true }
+);
+
+// Theme & Motion Pause
+$("#btn-theme-toggle")?.addEventListener("click", (e) => {
+  playTone("click");
   const html = doc.documentElement;
   const next = html.getAttribute("data-theme") === "daylight" ? "dark" : "daylight";
   html.setAttribute("data-theme", next);
-  e.currentTarget.textContent = next === "daylight" ? "🌙 Gelap" : "☀ Siang";
+  e.currentTarget.textContent = next === "daylight" ? "🌙 Mode Gelap" : "☀ Mode Terang";
 });
 
 $("#btn-pause-motion")?.addEventListener("click", (e) => {
