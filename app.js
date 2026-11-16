@@ -10,10 +10,10 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matc
 let isMotionPaused = reducedMotion;
 
 // ============================================================================
-// 0. TACTILE SYNTHESIZER (SUBTLE WEB AUDIO FEEDBACK)
+// 0. TACTILE SYNTHESIZER (WEB AUDIO API)
 // ============================================================================
 let audioCtx = null;
-function playTone(type = "click") {
+function playTone(kind = "tick") {
   if (isMotionPaused) return;
   try {
     if (!audioCtx) {
@@ -28,7 +28,7 @@ function playTone(type = "click") {
     osc.connect(gain);
     gain.connect(audioCtx.destination);
 
-    if (type === "chime") {
+    if (kind === "chime") {
       osc.type = "triangle";
       osc.frequency.setValueAtTime(520, now);
       osc.frequency.exponentialRampToValueAtTime(980, now + 0.12);
@@ -46,12 +46,12 @@ function playTone(type = "click") {
       osc.stop(now + 0.045);
     }
   } catch {
-    // Ignore before user gesture
+    // Ignore before user interaction
   }
 }
 
 // ============================================================================
-// 1. UNIFIED LENIS + GSAP SCROLLTRIGGER LOOP & NAVIGATION
+// 1. UNIFIED LENIS + GSAP SCROLLTRIGGER LOOP
 // ============================================================================
 const hasGSAP = typeof window.gsap !== "undefined" && typeof window.ScrollTrigger !== "undefined";
 if (hasGSAP) window.gsap.registerPlugin(window.ScrollTrigger);
@@ -72,7 +72,6 @@ if (typeof window.Lenis !== "undefined" && !reducedMotion) {
   }
 }
 
-// Scroll Progress & Active Section Observer
 const progressBar = $("#scroll-progress-bar");
 window.addEventListener(
   "scroll",
@@ -86,29 +85,13 @@ window.addEventListener(
   { passive: true }
 );
 
-const sections = $$(".story-section");
-const navLinks = $$(".nav-link");
-const secObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        navLinks.forEach((l) => l.classList.toggle("active", l.getAttribute("data-sec") === id));
-      }
-    });
-  },
-  { threshold: 0.25 }
-);
-sections.forEach((s) => secObserver.observe(s));
-
-// Ambient Spotlight Pointer Tracking
 window.addEventListener(
   "pointermove",
   (e) => {
     doc.documentElement.style.setProperty("--mx", `${e.clientX}px`);
     doc.documentElement.style.setProperty("--my", `${e.clientY}px`);
 
-    const eyes = $("#fox-dock-eyes");
+    const eyes = $("#fox-eyes");
     if (eyes && !isMotionPaused) {
       const dx = clamp(((e.clientX / window.innerWidth) - 0.85) * 6, -3.5, 3.5);
       const dy = clamp(((e.clientY / window.innerHeight) - 0.85) * 6, -3.5, 3.5);
@@ -119,26 +102,29 @@ window.addEventListener(
 );
 
 // ============================================================================
-// 2. THREE.JS r186 REAL-TIME 3D STAGE (ORIGAMI FOX & EXPLODED SPATIAL CORE)
+// 2. STICKY STAGE THREE.JS r186 ENGINE (MORPHS PER STORYSCROLL STEP!)
 // ============================================================================
-const stage3d = $("#webgl-stage");
-const fpsReadout = $("#fps-readout");
-let pulse3D = () => {};
+const webglWrap = $("#sticky-webgl-wrap");
+const webglStateTag = $("#webgl-state-tag");
 
-if (stage3d) {
+let setStage3DStep = () => {};
+let setExplodeFactor = () => {};
+let trigger3DJump = () => {};
+
+if (webglWrap) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(stage3d.clientWidth, stage3d.clientHeight);
+  renderer.setSize(webglWrap.clientWidth, webglWrap.clientHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.18;
-  stage3d.appendChild(renderer.domElement);
+  webglWrap.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, stage3d.clientWidth / stage3d.clientHeight, 0.1, 100);
-  camera.position.set(0, 0.35, 5.1);
+  const camera = new THREE.PerspectiveCamera(40, webglWrap.clientWidth / webglWrap.clientHeight, 0.1, 100);
+  camera.position.set(0, 0.3, 4.9);
 
   scene.add(new THREE.AmbientLight(0xfff8eb, 0.85));
-  const keyLight = new THREE.DirectionalLight(0xe2ff54, 2.3);
+  const keyLight = new THREE.DirectionalLight(0xe2ff54, 2.4);
   keyLight.position.set(3.5, 4.5, 4.2);
   scene.add(keyLight);
 
@@ -148,7 +134,7 @@ if (stage3d) {
 
   const amberMat = new THREE.MeshStandardMaterial({
     color: 0xf59e0b,
-    roughness: 0.26,
+    roughness: 0.25,
     metalness: 0.38,
     flatShading: true,
   });
@@ -166,168 +152,155 @@ if (stage3d) {
   const limeMat = new THREE.MeshStandardMaterial({
     color: 0xe2ff54,
     emissive: 0x65a30d,
-    emissiveIntensity: 0.75,
+    emissiveIntensity: 0.78,
     roughness: 0.2,
     metalness: 0.5,
   });
   const tealMat = new THREE.MeshStandardMaterial({
     color: 0x2dd4bf,
     emissive: 0x0d9488,
-    emissiveIntensity: 0.7,
+    emissiveIntensity: 0.72,
     roughness: 0.2,
     metalness: 0.5,
   });
-  const allMaterials = [amberMat, boneMat, darkMat, limeMat, tealMat];
+  const allMats = [amberMat, boneMat, darkMat, limeMat, tealMat];
 
   const root = new THREE.Group();
   scene.add(root);
 
-  // Group 1: Origami Fox
-  const foxGroup = new THREE.Group();
-  root.add(foxGroup);
-
-  const headGeo = new THREE.OctahedronGeometry(1.04, 1);
+  // Origami Fox Head & Articulated Parts (Supports Exploded View!)
+  const headGeo = new THREE.OctahedronGeometry(0.95, 1);
   headGeo.scale(1.15, 0.92, 0.95);
-  foxGroup.add(new THREE.Mesh(headGeo, amberMat));
+  const headMesh = new THREE.Mesh(headGeo, amberMat);
+  root.add(headMesh);
 
-  const snoutGeo = new THREE.ConeGeometry(0.66, 0.86, 4);
+  const snoutGeo = new THREE.ConeGeometry(0.62, 0.82, 4);
   snoutGeo.rotateX(Math.PI * 0.5);
-  const snout = new THREE.Mesh(snoutGeo, boneMat);
-  snout.position.set(0, -0.18, 0.75);
-  foxGroup.add(snout);
+  const snoutMesh = new THREE.Mesh(snoutGeo, boneMat);
+  snoutMesh.position.set(0, -0.16, 0.7);
+  root.add(snoutMesh);
 
-  const nose = new THREE.Mesh(new THREE.OctahedronGeometry(0.12, 0), darkMat);
-  nose.position.set(0, -0.1, 1.18);
-  foxGroup.add(nose);
+  const noseMesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.11, 0), darkMat);
+  noseMesh.position.set(0, -0.09, 1.1);
+  root.add(noseMesh);
 
-  const earGeo = new THREE.ConeGeometry(0.36, 0.95, 4);
+  const earGeo = new THREE.ConeGeometry(0.34, 0.88, 4);
   const earL = new THREE.Group();
-  earL.position.set(-0.56, 0.65, 0.05);
+  earL.position.set(-0.52, 0.6, 0.05);
   earL.rotation.z = 0.28;
   const earLM = new THREE.Mesh(earGeo, amberMat);
-  earLM.position.y = 0.38;
+  earLM.position.y = 0.35;
   earL.add(earLM);
-  foxGroup.add(earL);
+  root.add(earL);
 
   const earR = new THREE.Group();
-  earR.position.set(0.56, 0.65, 0.05);
+  earR.position.set(0.52, 0.6, 0.05);
   earR.rotation.z = -0.28;
   const earRM = new THREE.Mesh(earGeo, amberMat);
-  earRM.position.y = 0.38;
+  earRM.position.y = 0.35;
   earR.add(earRM);
-  foxGroup.add(earR);
+  root.add(earR);
 
-  const eyeGeo = new THREE.BoxGeometry(0.24, 0.1, 0.1);
+  const eyeGeo = new THREE.BoxGeometry(0.22, 0.09, 0.09);
   const eyeL = new THREE.Mesh(eyeGeo, limeMat);
-  eyeL.position.set(-0.4, 0.12, 0.86);
+  eyeL.position.set(-0.38, 0.11, 0.8);
   eyeL.rotation.z = -0.1;
-  foxGroup.add(eyeL);
+  root.add(eyeL);
 
   const eyeR = new THREE.Mesh(eyeGeo, limeMat);
-  eyeR.position.set(0.4, 0.12, 0.86);
+  eyeR.position.set(0.38, 0.11, 0.8);
   eyeR.rotation.z = 0.1;
-  foxGroup.add(eyeR);
+  root.add(eyeR);
 
-  const orbitA = new THREE.Mesh(new THREE.TorusGeometry(1.65, 0.02, 12, 72), limeMat);
-  orbitA.rotation.x = Math.PI * 0.42;
-  const orbitB = new THREE.Mesh(new THREE.TorusGeometry(1.85, 0.015, 12, 72), tealMat);
-  orbitB.rotation.y = Math.PI * 0.25;
-  foxGroup.add(orbitA, orbitB);
-
-  // Group 2: Exploded Spatial Core
-  const coreGroup = new THREE.Group();
-  coreGroup.visible = false;
-  root.add(coreGroup);
-
-  const centerCrystal = new THREE.Mesh(new THREE.IcosahedronGeometry(0.68, 0), limeMat);
-  const ring1 = new THREE.Mesh(new THREE.TorusGeometry(1.15, 0.04, 16, 64), amberMat);
-  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.48, 0.03, 16, 64), tealMat);
-  const ring3 = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.025, 16, 64), boneMat);
-  coreGroup.add(centerCrystal, ring1, ring2, ring3);
+  // Concentric Gyro Rings & Orbital Satellites around the Fox
+  const ringOuter = new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.022, 14, 72), limeMat);
+  ringOuter.rotation.x = Math.PI * 0.42;
+  const ringInner = new THREE.Mesh(new THREE.TorusGeometry(1.28, 0.018, 14, 72), tealMat);
+  ringInner.rotation.y = Math.PI * 0.25;
+  root.add(ringOuter, ringInner);
 
   const satellites = [];
   for (let i = 0; i < 6; i++) {
-    const sat = new THREE.Mesh(new THREE.OctahedronGeometry(0.18, 0), i % 2 === 0 ? amberMat : tealMat);
+    const sat = new THREE.Mesh(new THREE.OctahedronGeometry(0.14, 0), i % 2 === 0 ? limeMat : tealMat);
     const angle = (i / 6) * Math.PI * 2;
     sat.userData = { angle };
-    sat.position.set(Math.cos(angle) * 1.45, Math.sin(angle) * 1.45, 0);
-    coreGroup.add(sat);
+    root.add(sat);
     satellites.push(sat);
   }
 
-  let isDragging = false;
-  let px = 0, py = 0;
-  let targetY = 0.25, targetX = 0.08;
-  let jumpVel = 0, jumpY = 0, spinBoost = 0;
+  // Dynamic target state controlled by active Storyscroll chapter (0..5)
+  let targetCamZ = 4.9;
+  let targetRotY = 0.25;
+  let targetRotX = 0.08;
+  let explodeAmount = 0.0;
+  let targetExplode = 0.0;
+  let jumpVel = 0;
+  let jumpY = 0;
+  let spinBoost = 0;
+  let isWireframe = false;
 
-  stage3d.addEventListener("pointerdown", (e) => {
-    isDragging = true;
-    px = e.clientX;
-    py = e.clientY;
-  });
-  window.addEventListener("pointermove", (e) => {
-    if (isDragging) {
-      targetY += (e.clientX - px) * 0.01;
-      targetX = clamp(targetX + (e.clientY - py) * 0.008, -0.6, 0.6);
-      px = e.clientX;
-      py = e.clientY;
-    } else if (!isMotionPaused) {
-      const nx = (e.clientX / window.innerWidth) * 2 - 1;
-      const ny = (e.clientY / window.innerHeight) * 2 - 1;
-      targetY = nx * 0.42;
-      targetX = ny * 0.22;
-    }
-  });
-  window.addEventListener("pointerup", () => {
-    isDragging = false;
-  });
+  const stepConfigs = [
+    { tag: "BAB 01 // 3-TIER SETUP & GRILL-ME GATE", rotY: 0.25, rotX: 0.08, camZ: 4.8, exp: 0.0 },
+    { tag: "BAB 02 // CONCENTRIC GEOMETRY & 4-LAYER ELEVATION", rotY: -0.45, rotX: 0.22, camZ: 4.5, exp: 0.25 },
+    { tag: "BAB 03 // GSAP 3.13 + LENIS SPRING PHYSICS", rotY: 0.65, rotX: -0.12, camZ: 4.6, exp: 0.1 },
+    { tag: "BAB 04 // MOTIONILO 3-PLANE PARALLAX ENGINE", rotY: -0.2, rotX: 0.3, camZ: 4.7, exp: 0.35 },
+    { tag: "BAB 05 // THREE.JS r186 EXPLODED SPATIAL VIEW", rotY: 0.4, rotX: 0.15, camZ: 5.1, exp: 0.65 },
+    { tag: "BAB 06 // REA CLEAN-ROOM FORENSIC X-RAY", rotY: -0.55, rotX: 0.05, camZ: 4.6, exp: 0.45 },
+  ];
 
-  pulse3D = () => {
-    playTone("chime");
-    jumpVel = 0.14;
-    spinBoost = 0.24;
+  setStage3DStep = (stepIdx) => {
+    const cfg = stepConfigs[stepIdx] || stepConfigs[0];
+    targetRotY = cfg.rotY;
+    targetRotX = cfg.rotX;
+    targetCamZ = cfg.camZ;
+    targetExplode = cfg.exp;
+    spinBoost = 0.12;
+    if (webglStateTag) webglStateTag.textContent = cfg.tag;
   };
 
-  $$("[data-3d]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      playTone("click");
-      $$("[data-3d]").forEach((b) => b.classList.remove("active"));
-      btn.classList.add("active");
-      const mode = btn.getAttribute("data-3d");
-      if (mode === "fox") {
-        foxGroup.visible = true;
-        coreGroup.visible = false;
-        allMaterials.forEach((m) => (m.wireframe = false));
-      } else if (mode === "core") {
-        foxGroup.visible = false;
-        coreGroup.visible = true;
-        allMaterials.forEach((m) => (m.wireframe = false));
-      } else {
-        allMaterials.forEach((m) => (m.wireframe = true));
-      }
-    });
+  setExplodeFactor = (norm) => {
+    targetExplode = clamp(norm, 0, 1);
+  };
+
+  trigger3DJump = () => {
+    playTone("chime");
+    jumpVel = 0.14;
+    spinBoost = 0.25;
+  };
+
+  $("#btn-stage-wire")?.addEventListener("click", (e) => {
+    playTone("click");
+    isWireframe = !isWireframe;
+    allMats.forEach((m) => (m.wireframe = isWireframe));
+    e.currentTarget.classList.toggle("btn--primary", isWireframe);
   });
 
-  $("#btn-3d-pulse")?.addEventListener("click", () => pulse3D());
+  $("#btn-stage-jump")?.addEventListener("click", () => trigger3DJump());
+
+  let dragging = false;
+  let prevX = 0, prevY = 0;
+  webglWrap.addEventListener("pointerdown", (e) => {
+    dragging = true;
+    prevX = e.clientX;
+    prevY = e.clientY;
+  });
+  window.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    targetRotY += (e.clientX - prevX) * 0.011;
+    targetRotX = clamp(targetRotX + (e.clientY - prevY) * 0.008, -0.65, 0.65);
+    prevX = e.clientX;
+    prevY = e.clientY;
+  });
+  window.addEventListener("pointerup", () => {
+    dragging = false;
+  });
 
   const timer = new THREE.Timer();
   timer.connect(doc);
-  let frames = 0, acc = 0;
 
   renderer.setAnimationLoop(() => {
     timer.update();
-    const dt = Math.min(timer.getDelta(), 0.1);
     const el = timer.getElapsed();
-
-    frames++;
-    acc += dt;
-    if (acc >= 0.5) {
-      if (fpsReadout) {
-        fpsReadout.textContent = `${isMotionPaused ? "PAUSED" : Math.min(120, Math.round(frames / acc)) + " FPS"} · THREE.Timer`;
-      }
-      frames = 0;
-      acc = 0;
-    }
 
     if (!isMotionPaused) {
       if (jumpY > 0 || jumpVel !== 0) {
@@ -339,30 +312,35 @@ if (stage3d) {
         }
       }
       spinBoost *= 0.91;
+      explodeAmount = lerp(explodeAmount, targetExplode, 0.08);
+      camera.position.z = lerp(camera.position.z, targetCamZ, 0.06);
 
-      root.position.y = Math.sin(el * 2.2) * 0.1 + jumpY;
-      root.rotation.y += (targetY - root.rotation.y) * 0.08 + spinBoost;
-      root.rotation.x += (targetX - root.rotation.x) * 0.08;
+      root.position.y = Math.sin(el * 2.2) * 0.08 + jumpY;
+      root.rotation.y += (targetRotY - root.rotation.y) * 0.07 + spinBoost;
+      root.rotation.x += (targetRotX - root.rotation.x) * 0.07;
+
+      // Exploded view offsets
+      snoutMesh.position.z = 0.7 + explodeAmount * 0.55;
+      noseMesh.position.z = 1.1 + explodeAmount * 0.85;
+      earL.position.set(-0.52 - explodeAmount * 0.45, 0.6 + explodeAmount * 0.45, 0.05);
+      earR.position.set(0.52 + explodeAmount * 0.45, 0.6 + explodeAmount * 0.45, 0.05);
+      ringOuter.scale.setScalar(1 + explodeAmount * 0.25);
+      ringInner.scale.setScalar(1 + explodeAmount * 0.15);
 
       earL.rotation.z = 0.28 + Math.sin(el * 3.4) * 0.08;
       earR.rotation.z = -0.28 - Math.sin(el * 3.4 + 0.5) * 0.08;
-      orbitA.rotation.z = el * 0.5;
-      orbitB.rotation.x = el * 0.38;
+      ringOuter.rotation.z = el * 0.52;
+      ringInner.rotation.x = el * 0.4;
 
-      const blink = el % 4.0 > 3.86 ? 0.15 : 1.0;
+      const blink = el % 4.0 > 3.86 ? 0.14 : 1.0;
       eyeL.scale.y = blink;
       eyeR.scale.y = blink;
 
-      centerCrystal.rotation.y = el * 0.85;
-      centerCrystal.rotation.x = el * 0.5;
-      ring1.rotation.x = el * 1.1;
-      ring2.rotation.y = el * 0.8;
-      ring3.rotation.z = el * 0.6;
       satellites.forEach((sat, idx) => {
-        const r = 1.4 + Math.sin(el * 2.5 + idx) * 0.22;
-        const a = sat.userData.angle + el * 0.45;
-        sat.position.set(Math.cos(a) * r, Math.sin(a) * r, Math.sin(el * 2 + idx) * 0.3);
-        sat.rotation.y = el * 1.5;
+        const rad = 1.38 + explodeAmount * 0.65 + Math.sin(el * 2.2 + idx) * 0.12;
+        const a = sat.userData.angle + el * 0.5;
+        sat.position.set(Math.cos(a) * rad, Math.sin(a) * rad, Math.sin(el * 2 + idx) * 0.25);
+        sat.rotation.y = el * 1.4;
       });
     }
 
@@ -372,363 +350,298 @@ if (stage3d) {
   window.addEventListener(
     "resize",
     () => {
-      camera.aspect = stage3d.clientWidth / stage3d.clientHeight;
+      camera.aspect = webglWrap.clientWidth / webglWrap.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(stage3d.clientWidth, stage3d.clientHeight);
+      renderer.setSize(webglWrap.clientWidth, webglWrap.clientHeight);
     },
     { passive: true }
   );
 }
 
 // ============================================================================
-// 3. BAB 02: 3-TIER SETUP KERJA AWAL SWITCHER
+// 3. STORYSCROLL STEP SYNCHRONIZATION (SCROLL -> STICKY STAGE MORPH)
 // ============================================================================
-const tierContent = {
-  tier1: {
-    title: "Lapis 01 // ~/.gemini/GEMINI.md (Global Workspace Rules)",
-    code: `<span class="hl-muted"># 1. Disiplin Rekayasa Kode (Karpathy Guardrails)</span>
-- <span class="hl-lime">Think Before Coding</span>: Periksa package.json / pyproject.toml nyata sebelum menulis import.
-- <span class="hl-lime">Simplicity First</span>: Tulis kode seminimal mungkin yang menyelesaikan masalah nyata, zero // TODO.
-- <span class="hl-lime">Surgical Changes</span>: Sentuh hanya file yang berkaitan dengan tugas, bersihkan import yatim.
+const storySteps = $$(".story-step");
+const deckPanes = $$(".deck-pane");
+const stageDots = $$("[data-goto-step]");
+const stageActiveLabel = $("#stage-active-label");
 
-<span class="hl-muted"># 2. Progressive Disclosure (On-Demand Skill Routing)</span>
-Jangan menumpuk seluruh instruksi di awal sesi. Muat SKILL.md hanya saat dipanggil:
-  • <span class="hl-teal">/architect</span>  -&gt; pro-architect (4-Layer Headless Engine vs UI)
-  • <span class="hl-teal">/ui-modern</span>  -&gt; ui-modern + design-md (Concentric Math &amp; 4-Layer Surface)
-  • <span class="hl-teal">/motionilo</span>  -&gt; motionilo + scene_qa.py (Programmatic Video &amp; Safe-Area Gate)
-  • <span class="hl-teal">web-motion</span>  -&gt; GSAP 3.13 + Lenis Single Ticker Loop
-  • <span class="hl-teal">threejs-dev</span> -&gt; Three.js r186 THREE.Timer &amp; WebGPU Shaders
-  • <span class="hl-teal">/rea</span>        -&gt; Clean-Room Forensic UI &amp; Motion Reconstruction`,
-  },
-  tier2: {
-    title: "Lapis 02 // Arsitektur 4-Layer (/architect) & Modular SKILL.md",
-    code: `<span class="hl-muted"># Struktur 4-Layer Headless (pro-architect)</span>
-src/
-├── <span class="hl-lime">core/</span>        # LAYER 1: Headless Business Engine (TypeScript murni, zero UI)
-│   ├── engine/  # State machine, kalkulasi matematika, model komputasi
-│   └── store/   # Transactional store / signals 60fps
-├── <span class="hl-teal">services/</span>    # LAYER 2: I/O &amp; External Adapters (API, Storage)
-├── <span class="hl-amber">features/</span>    # LAYER 3: Colocated Feature Slices (Components + Hooks)
-└── <span class="hl-lime">shared/</span>      # LAYER 4: Design System Primitives &amp; Tokens
+const stepTitles = [
+  "● STAGE AKTIF: BAB 01 // SETUP & GRILL-ME",
+  "● STAGE AKTIF: BAB 02 // UI-MODERN & TAILWIND v4",
+  "● STAGE AKTIF: BAB 03 // WEB-MOTION CHOREOGRAPHY",
+  "● STAGE AKTIF: BAB 04 // MOTIONILO VIDEO ENGINE",
+  "● STAGE AKTIF: BAB 05 // THREE.JS r186 & WEBGPU",
+  "● STAGE AKTIF: BAB 06 // REA CLEAN-ROOM FORENSICS",
+];
 
-<span class="hl-muted"># Kontrak Mode Eksekusi di Setiap SKILL.md:</span>
-mode: <span class="hl-lime">fast</span> | <span class="hl-teal">standard</span> | <span class="hl-amber">deep</span>
-- fast     : &le; 1 komponen, gunakan starter mandiri di SKILL.md (0 file referensi dibuka)
-- standard : 1 halaman / video &le; 30s, muat 1-2 file referensi terkait
-- deep     : multi-scene / multi-section, wajib jalankan gate scene_qa.py &amp; verify.ps1`,
-  },
-  tier3: {
-    title: "Lapis 03 // project/DESIGN.md (Visual System Specification)",
-    code: `<span class="hl-muted">---</span>
-<span class="hl-lime">colors:</span>
-  canvas: "#08090d"
-  surface-1: "#101219"
-  surface-2: "#161923"
-  hairline: "rgba(244, 242, 237, 0.08)"
-  primary: "#e2ff54"
-  secondary: "#2dd4bf"
-<span class="hl-lime">geometry:</span>
-  concentric-rule: "R_inner = max(0, R_outer - Padding)"
-  tactile-press: "50ms cubic-bezier(0.16, 1, 0.3, 1) scale(0.97)"
-<span class="hl-muted">---</span>
-<span class="hl-teal"># Aturan Disiplin Visual:</span>
-1. Dilarang mengarang warna hex di luar variabel CSS root.
-2. Semua angka dinamis &amp; metrik wajib memakai font-variant-numeric: tabular-nums.
-3. Tersedia 7 preset siap pakai: Linear, Vercel, Apple, Raycast, Claude, PostHog, CAD.`,
-  },
-};
-
-$$("[data-tier]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    playTone("click");
-    const key = btn.getAttribute("data-tier");
-    const item = tierContent[key];
-    if (!item) return;
-    $$("[data-tier]").forEach((b) => b.classList.toggle("active", b === btn));
-    $("#tier-window-title").textContent = item.title;
-    $("#tier-window-code").innerHTML = item.code;
-  });
-});
-
-// ============================================================================
-// 4. BAB 03: LIVE PROCEDURAL MOTION GRAPHICS PLAYER & INTERACTIVE LABS
-// ============================================================================
-const mgViewport = $("#mg-viewport");
-const mgSafeGuide = $("#mg-safe-guide");
-const mgRatioTag = $("#mg-ratio-tag");
-const mgBgOrb = $("#mg-bg-orb");
-const mgMidCard = $("#mg-mid-card");
-const mgBeatLabel = $("#mg-beat-label");
-const mgHeadline = $("#mg-headline");
-const mgSubtitle = $("#mg-subtitle");
-const mgScrubber = $("#mg-scrubber");
-const mgFrameReadout = $("#mg-frame-readout");
-const mgPlayBtn = $("#btn-mg-play");
-const mgBars = $$("#mg-bars .mograph-bar");
-
-const ratioConfigs = {
-  "9:16": { w: "175px", h: "245px", inset: "12% 10% 20% 10%", label: "9:16" },
-  "16:9": { w: "285px", h: "165px", inset: "8% 6% 16% 6%", label: "16:9" },
-  "1:1":  { w: "215px", h: "215px", inset: "8% 8% 16% 8%", label: "1:1" },
-};
-
-$$("[data-ratio]").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    playTone("click");
-    const r = btn.getAttribute("data-ratio");
-    const cfg = ratioConfigs[r];
-    if (!cfg) return;
-    $$("[data-ratio]").forEach((b) => b.classList.toggle("btn--primary", b === btn));
-    if (mgViewport) {
-      mgViewport.style.width = cfg.w;
-      mgViewport.style.height = cfg.h;
-    }
-    if (mgSafeGuide) mgSafeGuide.style.inset = cfg.inset;
-    if (mgRatioTag) mgRatioTag.textContent = cfg.label;
-  });
-});
-
-let mgPlaying = true;
-let mgFrame = 0;
-
-function renderMographFrame(f) {
-  const norm = f / 300;
-  if (mgFrameReadout) mgFrameReadout.textContent = `F: ${String(f).padStart(3, "0")} / 300`;
-  if (mgScrubber && document.activeElement !== mgScrubber) mgScrubber.value = String(f);
-
-  // 3-Beat Scene Progression
-  if (f < 100) {
-    if (mgBeatLabel) mgBeatLabel.textContent = "SCENE 01 // HOOK (0.0s - 3.3s)";
-    if (mgHeadline) mgHeadline.textContent = "Ritme Visual Terukur";
-    if (mgSubtitle) mgSubtitle.textContent = "Safe-Area terkunci otomatis";
-  } else if (f < 200) {
-    if (mgBeatLabel) mgBeatLabel.textContent = "SCENE 02 // DATA (3.3s - 6.6s)";
-    if (mgHeadline) mgHeadline.textContent = "3-Plane Depth Parallax";
-    if (mgSubtitle) mgSubtitle.textContent = "Kontras >= 4.5:1 & Spring Damping 20";
-  } else {
-    if (mgBeatLabel) mgBeatLabel.textContent = "SCENE 03 // CTA (6.6s - 10.0s)";
-    if (mgHeadline) mgHeadline.textContent = "Lolos Gate scene_qa.py";
-    if (mgSubtitle) mgSubtitle.textContent = "Siap Render MP4 60fps di Remotion v4";
+function activateStep(idx) {
+  storySteps.forEach((s, i) => s.classList.toggle("is-active", i === idx));
+  deckPanes.forEach((d, i) => d.classList.toggle("active", i === idx));
+  stageDots.forEach((b, i) => b.classList.toggle("active", i === idx));
+  if (stageActiveLabel && stepTitles[idx]) {
+    stageActiveLabel.textContent = stepTitles[idx];
   }
-
-  const wave = Math.sin(norm * Math.PI * 4);
-  if (mgBgOrb) {
-    mgBgOrb.style.transform = `translate(${(wave * 18).toFixed(1)}px, ${(Math.cos(norm * Math.PI * 2) * 12).toFixed(1)}px)`;
-  }
-  if (mgMidCard) {
-    mgMidCard.style.transform = `translateY(${(Math.sin(norm * Math.PI * 2) * -4).toFixed(1)}px)`;
-  }
-  mgBars.forEach((bar, i) => {
-    const h = 28 + Math.abs(Math.sin(norm * Math.PI * 3 + i * 0.7)) * 68;
-    bar.style.height = `${h.toFixed(0)}%`;
-  });
+  setStage3DStep(idx);
 }
 
-mgPlayBtn?.addEventListener("click", () => {
-  playTone("click");
-  mgPlaying = !mgPlaying;
-  mgPlayBtn.textContent = mgPlaying ? "⏸ Pause" : "▶ Play";
+const stepObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        const idx = parseInt(entry.target.getAttribute("data-step"), 10) || 0;
+        activateStep(idx);
+      }
+    });
+  },
+  { rootMargin: "-28% 0px -42% 0px", threshold: 0.05 }
+);
+
+storySteps.forEach((step) => stepObserver.observe(step));
+
+stageDots.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    playTone("click");
+    const idx = parseInt(btn.getAttribute("data-goto-step"), 10) || 0;
+    activateStep(idx);
+    const targetEl = $(`#step-${idx}`);
+    if (targetEl) targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+  });
 });
 
-mgScrubber?.addEventListener("input", () => {
-  mgFrame = parseInt(mgScrubber.value, 10) || 0;
-  renderMographFrame(mgFrame);
+// ============================================================================
+// 4. STICKY STAGE DECK INTERACTIONS (DECKS 0..5)
+// ============================================================================
+
+// Deck 0: Grill-Me 3-Choice Simulator
+const grillResponses = {
+  opt1: `[Prompt Pemilik]: "Buatkan halaman produk untuk aplikasiku" (Masih Abu-Abu)
+[Respon AI dengan Grill-Me Gate]:
+❓ Q1 (Target Stack): Rekomendasi -> Next.js App Router + Tailwind v4 + GSAP.
+❓ Q2 (Cara Kerja Planning): Pilih mode kerja kita:
+  ▸ [Aktif: Opsi 1 - AI Full Planning] Baik, aku susun arsitektur 4-layer, DESIGN.md, dan seluruh komponennya dari awal sampai selesai sekarang!`,
+
+  opt2: `[Prompt Pemilik]: "Buatkan halaman produk untuk aplikasiku" (Masih Abu-Abu)
+[Respon AI dengan Grill-Me Gate]:
+  ▸ [Aktif: Opsi 2 - Pemilik yang Planning] Siap! Silakan kirimkan poin-poin struktur halaman atau sketsa alur yang kamu mau, nanti aku eksekusi kodenya persis mengikuti rencana utamamu tanpa mengubah arahnya.`,
+
+  opt3: `[Prompt Pemilik]: "Buatkan halaman produk untuk aplikasiku" (Masih Abu-Abu)
+[Respon AI dengan Grill-Me Gate]:
+  ▸ [Aktif: Opsi 3 - Kolaborasi Sambil Tanya-Jawab (/grill-me)]
+  Putaran 1:
+  1. Apakah halaman ini fokus ke konversi langsung (checkout) atau demo interaktif? (Rekomendasi: Demo + Pricing)
+  2. Tema permukaan gelap (Obsidian) atau terang (Editorial)? (Ketik "ya" bila setuju rekomendasi)`,
+};
+
+$$("[data-grill]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    playTone("click");
+    const key = btn.getAttribute("data-grill");
+    $$("[data-grill]").forEach((b) => b.classList.toggle("active", b === btn));
+    const box = $("#grill-sim-out");
+    if (box && grillResponses[key]) box.textContent = grillResponses[key];
+  });
 });
 
-setInterval(() => {
-  if (!isMotionPaused && mgPlaying) {
-    mgFrame = (mgFrame + 1) % 301;
-    renderMographFrame(mgFrame);
-  }
-}, 40);
-
-// Concentric Radius Calculator
-const inpROut = $("#inp-r-out");
-const inpPad = $("#inp-pad");
-function updateConcentric() {
-  const ro = parseInt(inpROut.value, 10);
-  const pd = parseInt(inpPad.value, 10);
+// Deck 1: UI-Modern Concentric Radius Calculator
+const rngROut = $("#rng-r-out");
+const rngRPad = $("#rng-r-pad");
+function updateConcentricDeck() {
+  const ro = parseInt(rngROut.value, 10);
+  const pd = parseInt(rngRPad.value, 10);
   const ri = Math.max(0, ro - pd);
-  $("#val-r-out").textContent = `${ro}px`;
-  $("#val-pad").textContent = `${pd}px`;
-  $("#val-r-in").textContent = `${ri}px`;
-  $("#calc-formula-badge").textContent = `${ro}px - ${pd}px = ${ri}px`;
-  const outer = $("#demo-outer");
-  const inner = $("#demo-inner");
+  $("#lbl-r-out").textContent = `${ro}px`;
+  $("#lbl-r-pad").textContent = `${pd}px`;
+  $("#lbl-r-in").textContent = `${ri}px`;
+  $("#deck-radius-formula").textContent = `${ro}px - ${pd}px = ${ri}px`;
+  const outer = $("#preview-outer-box");
+  const inner = $("#preview-inner-box");
   if (outer) {
     outer.style.borderRadius = `${ro}px`;
     outer.style.padding = `${pd}px`;
   }
   if (inner) inner.style.borderRadius = `${ri}px`;
 }
-inpROut?.addEventListener("input", updateConcentric);
-inpPad?.addEventListener("input", updateConcentric);
+rngROut?.addEventListener("input", updateConcentricDeck);
+rngRPad?.addEventListener("input", updateConcentricDeck);
 
-// Easing Race Lab
-$("#btn-run-easing")?.addEventListener("click", () => {
+// Deck 2: Web-Motion Physics Arena
+$("#btn-deck-race")?.addEventListener("click", () => {
   playTone("chime");
-  const pLin = $("#puck-linear");
-  const pExp = $("#puck-expo");
-  const pSpr = $("#puck-spring");
-  if (!pLin || !pExp || !pSpr) return;
-  const dist = pLin.parentElement.clientWidth - 46;
+  const p1 = $("#puck-1");
+  const p2 = $("#puck-2");
+  const p3 = $("#puck-3");
+  if (!p1 || !p2 || !p3) return;
+  const dist = p1.parentElement.clientWidth - 42;
 
-  pLin.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
-    duration: 920,
+  p1.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
+    duration: 900,
     easing: "linear",
     fill: "forwards",
   });
-  pExp.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
-    duration: 920,
+  p2.animate([{ transform: "translateX(0)" }, { transform: `translateX(${dist}px)` }], {
+    duration: 900,
     easing: "cubic-bezier(0.16, 1, 0.3, 1)",
     fill: "forwards",
   });
-  pSpr.animate(
+  p3.animate(
     [
       { transform: "translateX(0)" },
       { transform: `translateX(${dist * 1.06}px)`, offset: 0.7 },
       { transform: `translateX(${dist * 0.985}px)`, offset: 0.86 },
       { transform: `translateX(${dist}px)`, offset: 1 },
     ],
-    { duration: 920, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
+    { duration: 900, easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "forwards" }
   );
 });
 
-// REA Forensic X-Ray Slider
-const inpXray = $("#inp-xray");
-const valXray = $("#val-xray");
-const xrayCodeLayer = $("#xray-code-layer");
-inpXray?.addEventListener("input", () => {
-  const v = parseInt(inpXray.value, 10);
-  if (valXray) valXray.textContent = `${v}%`;
-  if (xrayCodeLayer) xrayCodeLayer.style.clipPath = `inset(0 0 0 ${100 - v}%)`;
-});
-
-// ============================================================================
-// 5. BAB 05: DRIVE PACKAGE EXPLORER & COPY AI COMMAND
-// ============================================================================
-const pkgData = {
-  p00: {
-    title: "drive-package // 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md",
-    body: `Perintah 1-Baris untuk Dikirim ke AI:
-"Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu pasangkan setup kerjaan awal serta seluruh skill visual dan web-nya ke lingkunganku."
-
-Struktur Paket Lengkap:
-├── 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md
-├── 01-Setup-Motion-Graphics-Motionilo/
-├── 02-Setup-Web-Motion-Choreography/
-├── 03-Setup-UI-Modern-Design-System/
-├── 04-Setup-3D-WebGL-ThreeJS/
-├── 05-Setup-Reverse-Engineering-REA/
-└── 06-Bonus-Setup-Utama-Arsitektur-Global/`,
-  },
-  p06: {
-    title: "drive-package // 06-Bonus-Setup-Utama-Arsitektur-Global",
-    body: `06-Bonus-Setup-Utama-Arsitektur-Global/
-├── SETUP-DAN-PANDUAN-AI.md
-├── GEMINI-GLOBAL-RULES.md         (Aturan global &amp; progressive skill routing)
-├── DAFTAR-KURASI-PLUGIN-PENDUKUNG.md
-├── plugins.manifest.json          (Manifest hash SHA-256 seluruh file)
-├── install-all.ps1                (Installer otomatis 1-klik)
-├── verify.ps1                     (Verifikasi integritas SHA-256)
-├── uninstall.ps1                  (Pembersih terukur)
-├── pro-architect/                 (Skill /architect 4-layer headless)
-└── dialectic-architect/           (Skill pengujian arsitektur multi-agen)`,
-  },
-  p01: {
-    title: "drive-package // 01-Setup-Motion-Graphics-Motionilo",
-    body: `01-Setup-Motion-Graphics-Motionilo/
-├── SETUP-DAN-PANDUAN-AI.md
-├── motionilo/
-│   ├── plugin.json
-│   ├── scripts/
-│   │   ├── scene_qa.py            (Validator 47 aturan safe-rect, durasi, kontras, CPS)
-│   │   └── storyboard.py          (Generator pratinjau zona aman PNG)
-│   └── skills/motionilo/
-│       ├── SKILL.md               (Mode fast, standard, deep)
-│       ├── types/                 (01-story, 02-kinetic, 03-brand)
-│       ├── shared/                (01-safearea s.d. 07-qa-checklist)
-│       └── templates/             (Scene &amp; SRT subtitle templates)
-└── remotion-best-practices/       (Router teknis Remotion v4)`,
-  },
-  p02: {
-    title: "drive-package // 02-Setup-Web-Motion-Choreography",
-    body: `02-Setup-Web-Motion-Choreography/
-├── SETUP-DAN-PANDUAN-AI.md
-└── motion-stack/
-    ├── plugin.json
-    └── skills/web-motion/
-        ├── SKILL.md               (Starter GSAP 3.13 + Lenis Single Ticker Loop)
-        ├── references/            (ScrollTrigger, SplitText, Flip, 60fps, OKLCH)
-        ├── examples/              (hero-timeline.js, standalone-template.html)
-        └── scripts/media_verify.py (Inspeksi FPS &amp; resolusi video via FFprobe)`,
-  },
-  p03: {
-    title: "drive-package // 03-Setup-UI-Modern-Design-System",
-    body: `03-Setup-UI-Modern-Design-System/
-├── SETUP-DAN-PANDUAN-AI.md
-├── ui-modern/
-│   ├── plugin.json
-│   ├── primitives-kit/            (7 Komponen Primitif + Playwright E2E Runner)
-│   └── skills/ui-modern/
-│       ├── SKILL.md               (Token CSS mandiri, Concentric Math, 50ms Physics)
-│       └── references/            (spatial-math, motion-physics, color-elevation)
-└── design-md/
-    ├── SKILL.md
-    └── references/presets/        (linear, vercel, apple, raycast, claude, posthog, cad)`,
-  },
-  p04: {
-    title: "drive-package // 04-Setup-3D-WebGL-ThreeJS",
-    body: `04-Setup-3D-WebGL-ThreeJS/
-├── SETUP-DAN-PANDUAN-AI.md
-└── threejs-dev/
-    ├── plugin.json
-    └── skills/threejs-dev/
-        ├── SKILL.md               (Three.js r186 THREE.Timer, HDRLoader, WebGPU)
-        └── references/            (13 modul: shaders, lighting, r3f, asset-pipeline)`,
-  },
-  p05: {
-    title: "drive-package // 05-Setup-Reverse-Engineering-REA",
-    body: `05-Setup-Reverse-Engineering-REA/
-├── SETUP-DAN-PANDUAN-AI.md
-└── rea/
-    ├── plugin.json
-    ├── scripts/extract_animation.py
-    └── skills/rea/
-        ├── SKILL.md               (Ekstraksi 1-putaran &amp; 5 fase forensik clean-room)
-        └── references/            (web-animation-extraction, clean-room-synthesis)`,
-  },
+// Deck 3: MotionIlo Aspect Ratio Switcher
+const miniScreen = $("#mini-mg-screen");
+const miniTag = $("#mini-mg-tag");
+const mgRatios = {
+  "9:16": { w: "112px", h: "158px", tag: "SAFE 9:16" },
+  "16:9": { w: "185px", h: "108px", tag: "SAFE 16:9" },
+  "1:1":  { w: "140px", h: "140px", tag: "SAFE 1:1" },
 };
-
-$$("[data-pkg]").forEach((btn) => {
+$$("[data-mg-ratio]").forEach((btn) => {
   btn.addEventListener("click", () => {
     playTone("click");
-    const key = btn.getAttribute("data-pkg");
-    const info = pkgData[key];
-    if (!info) return;
-    $$("[data-pkg]").forEach((b) => b.classList.toggle("active", b === btn));
-    $("#pkg-window-title").textContent = info.title;
-    $("#pkg-window-body").innerHTML = info.body;
+    const r = btn.getAttribute("data-mg-ratio");
+    const cfg = mgRatios[r];
+    if (!cfg) return;
+    $$("[data-mg-ratio]").forEach((b) => b.classList.toggle("btn--primary", b === btn));
+    if (miniScreen) {
+      miniScreen.style.width = cfg.w;
+      miniScreen.style.height = cfg.h;
+    }
+    if (miniTag) miniTag.textContent = cfg.tag;
   });
 });
 
-$("#btn-copy-ai-cmd")?.addEventListener("click", async (e) => {
+// Deck 4: Three.js r186 Exploded View Slider
+const rngExplode = $("#rng-explode");
+const lblExplode = $("#lbl-explode");
+rngExplode?.addEventListener("input", () => {
+  const v = parseInt(rngExplode.value, 10);
+  if (lblExplode) lblExplode.textContent = `Explode: ${v}%`;
+  setExplodeFactor(v / 100);
+});
+
+// Deck 5: REA Forensic X-Ray Slider
+const rngXray = $("#rng-xray");
+const lblXray = $("#lbl-xray");
+const xrayBackPane = $("#xray-back-pane");
+rngXray?.addEventListener("input", () => {
+  const v = parseInt(rngXray.value, 10);
+  if (lblXray) lblXray.textContent = `${v}%`;
+  if (xrayBackPane) xrayBackPane.style.clipPath = `inset(0 0 0 ${100 - v}%)`;
+});
+
+// ============================================================================
+// 5. PRICING CALCULATOR, BUNDLE BUILDER & DIRECT CONTACT TO ILHAM
+// ============================================================================
+const checkboxes = $$(".skill-checkbox");
+const totalDisplay = $("#cart-total-display");
+const orderPreview = $("#order-message-preview");
+const cartModeBadge = $("#cart-mode-badge");
+const emailLink = $("#link-email-ilham");
+
+function formatRp(num) {
+  return "Rp " + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function recalculateCart() {
+  const selected = [];
+  let sum = 0;
+
+  checkboxes.forEach((cb) => {
+    const card = cb.closest(".skill-check-card");
+    card?.classList.toggle("is-selected", cb.checked);
+    if (cb.checked) {
+      selected.push(cb.getAttribute("data-name"));
+      sum += parseInt(cb.getAttribute("data-price"), 10) || 0;
+    }
+  });
+
+  // Update step buttons in narrative track
+  checkboxes.forEach((cb) => {
+    const key = cb.value;
+    const stepBtn = $(`[data-toggle-cart="${key}"]`);
+    if (stepBtn) {
+      stepBtn.textContent = cb.checked ? "✓ Masuk di Paket" : "+ Pilih Skill Ini";
+      stepBtn.classList.toggle("btn--primary", cb.checked);
+    }
+  });
+
+  const isFullBundle = selected.length === checkboxes.length;
+  const finalPrice = isFullBundle ? 349000 : sum;
+
+  if (totalDisplay) {
+    totalDisplay.textContent = formatRp(finalPrice);
+  }
+  if (cartModeBadge) {
+    cartModeBadge.textContent = isFullBundle
+      ? "PAKET LENGKAP (HEMAT Rp 346.000)"
+      : `${selected.length} MODUL DIPILIH`;
+  }
+
+  let msg = "";
+  if (isFullBundle) {
+    msg = `Halo Ilham! Aku tertarik beli Paket Bundling Lengkap (Semua 5 Skill Visual/Web + Bonus Setup Kerja Awal 3-Tier & Grill-Me Protocol).\nEstimasi Total: Rp 349.000 (Hemat Rp 346.000).\nBoleh minta info pembayaran dan link Google Drive-nya?`;
+  } else if (selected.length > 0) {
+    const listStr = selected.map((s, i) => `${i + 1}. ${s}`).join("\n");
+    msg = `Halo Ilham! Aku tertarik beli skill Antigravity berikut:\n${listStr}\nEstimasi Total: ${formatRp(finalPrice)}.\nBoleh minta info pembayaran dan link Google Drive-nya?`;
+  } else {
+    msg = `Halo Ilham! Aku tertarik tanya-tanya dulu soal paket Skill Visual & Setup Antigravity kamu.`;
+  }
+
+  if (orderPreview) orderPreview.textContent = msg;
+  if (emailLink) {
+    emailLink.href = `mailto:xanderilham4@gmail.com?subject=${encodeURIComponent("Order Antigravity Visual Skill Pack")}&body=${encodeURIComponent(msg)}`;
+  }
+}
+
+checkboxes.forEach((cb) => {
+  cb.addEventListener("change", () => {
+    playTone("click");
+    recalculateCart();
+  });
+});
+
+$("#btn-select-all-bundle")?.addEventListener("click", () => {
   playTone("chime");
-  const cmd =
-    "Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu pasangkan setup kerjaan awal serta seluruh skill visual dan web-nya ke lingkunganku.";
+  checkboxes.forEach((cb) => (cb.checked = true));
+  recalculateCart();
+});
+
+$$("[data-toggle-cart]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    playTone("click");
+    const key = btn.getAttribute("data-toggle-cart");
+    const cb = $(`.skill-checkbox[value="${key}"]`);
+    if (cb) {
+      cb.checked = !cb.checked;
+      recalculateCart();
+    }
+  });
+});
+
+$("#btn-copy-order")?.addEventListener("click", async (e) => {
+  playTone("chime");
+  const text = orderPreview ? orderPreview.textContent : "";
   try {
-    await navigator.clipboard.writeText(cmd);
+    await navigator.clipboard.writeText(text);
     const btn = e.currentTarget;
     const orig = btn.textContent;
-    btn.textContent = "✓ Perintah Setup Tersalin!";
-    setTimeout(() => (btn.textContent = orig), 1800);
+    btn.textContent = "✓ Pesan Order Tersalin! Tinggal Kirim ke Ilham";
+    setTimeout(() => (btn.textContent = orig), 2200);
   } catch {
-    // Ignore clipboard restriction
+    // Ignore clipboard fallback
   }
 });
 
 // ============================================================================
-// 6. COHESIVE ORIGAMI FOX PLAYGROUND (SURPRISE COMPANION)
+// 6. FULL-VIEWPORT ORIGAMI FOX SURPRISE PLAYGROUND
 // ============================================================================
 const foxCanvas = $("#fox-playground-canvas");
 const foxBubble = $("#fox-bubble");
@@ -761,21 +674,21 @@ if (foxCanvas) {
     timer: 0,
   };
 
-  const tips = [
-    "Kejutan! 🦊 Setup 3-Tier di Bab 02 menjaga agar AI kamu tidak mengarang dependensi atau memboroskan token.",
-    "Tahukah kamu? Semua simulasi di Bab 03 dirender 100% secara live dengan kode, bukan gambar tempelan!",
+  const foxTips = [
+    "Kejutan! 🦊 Kalau prompt kamu masih abu-abu, protokol Grill-Me otomatis memberi 3 pilihan cara planning!",
+    "Coba scroll dari Bab 01 sampai Bab 06: panggung 3D di sebelah kanan otomatis berubah mengikuti bab!",
+    "Ambil Paket Bundling Lengkap (Rp 349rb) untuk hemat Rp 346rb + gratis Setup Kerja Awal!",
     "Double-klik di titik mana saja di layar untuk melempar Orb Energi ke arahku!",
-    "Skill ini otomatis menyesuaikan mode fast, standard, atau deep baik di Gemini Hydrogen maupun Argon.",
   ];
   let tipIdx = 0;
 
   summonFoxSurprise = (tx, ty, customText) => {
     playTone("chime");
-    pulse3D();
+    trigger3DJump();
 
     if (foxBubble && foxSpeech) {
       foxBubble.classList.remove("is-hidden");
-      foxSpeech.textContent = customText || tips[tipIdx % tips.length];
+      foxSpeech.textContent = customText || foxTips[tipIdx % foxTips.length];
       tipIdx++;
     }
 
@@ -793,17 +706,16 @@ if (foxCanvas) {
       fox.x = -40;
       fox.y = H - 24;
     }
-    fox.timer = 340;
+    fox.timer = 320;
   };
 
-  function drawGeometricFox(ctx, f, t) {
+  function drawFox(ctx, f, t) {
     ctx.save();
     ctx.translate(f.x, f.y);
     ctx.scale(f.dir, 1);
     const hop = Math.abs(Math.sin(t * 14)) * 5;
     ctx.translate(0, -hop);
 
-    // Tail
     ctx.save();
     ctx.translate(-16, -12);
     ctx.rotate(Math.sin(t * 15) * 0.3);
@@ -816,13 +728,11 @@ if (foxCanvas) {
     ctx.fill();
     ctx.restore();
 
-    // Body
     ctx.fillStyle = "#f59e0b";
     ctx.beginPath();
     ctx.roundRect(-16, -22, 32, 18, 7);
     ctx.fill();
 
-    // Head
     ctx.fillStyle = "#fbbf24";
     ctx.beginPath();
     ctx.moveTo(6, -34);
@@ -831,7 +741,6 @@ if (foxCanvas) {
     ctx.closePath();
     ctx.fill();
 
-    // Ears
     ctx.fillStyle = "#e2ff54";
     ctx.beginPath();
     ctx.moveTo(8, -32);
@@ -905,7 +814,7 @@ if (foxCanvas) {
           fox.y = H - 24;
           if (fox.x < -70) fox.active = false;
         }
-        drawGeometricFox(ctx, fox, t);
+        drawFox(ctx, fox, t);
       }
 
       for (let i = sparks.length - 1; i >= 0; i--) {
@@ -930,7 +839,7 @@ if (foxCanvas) {
   requestAnimationFrame(loop);
 }
 
-$("#btn-nav-fox")?.addEventListener("click", () => {
+$("#btn-nav-surprise")?.addEventListener("click", () => {
   summonFoxSurprise(window.innerWidth * 0.5, window.innerHeight - 50);
 });
 $("#btn-hero-orb")?.addEventListener("click", () => {
@@ -946,33 +855,16 @@ window.addEventListener("dblclick", (e) => {
   summonFoxSurprise(e.clientX, Math.max(150, e.clientY));
 });
 
-// Auto-trigger once when scrolling into Bab 02
-let scrollSurpriseDone = false;
-window.addEventListener(
-  "scroll",
-  () => {
-    if (!scrollSurpriseDone && window.scrollY > 480) {
-      scrollSurpriseDone = true;
-      summonFoxSurprise(
-        window.innerWidth * 0.5,
-        window.innerHeight - 45,
-        "Hup! 🦊 Kamu masuk ke Bab Setup Kerjaan Awal (3-Tier Architecture). Klik tiap lapis untuk melihat isinya!"
-      );
-    }
-  },
-  { passive: true }
-);
-
 // Theme & Motion Pause
 $("#btn-theme-toggle")?.addEventListener("click", (e) => {
   playTone("click");
   const html = doc.documentElement;
   const next = html.getAttribute("data-theme") === "daylight" ? "dark" : "daylight";
   html.setAttribute("data-theme", next);
-  e.currentTarget.textContent = next === "daylight" ? "🌙 Mode Gelap" : "☀ Mode Terang";
+  e.currentTarget.textContent = next === "daylight" ? "🌙 Gelap" : "☀ Terang";
 });
 
 $("#btn-pause-motion")?.addEventListener("click", (e) => {
   isMotionPaused = !isMotionPaused;
-  e.currentTarget.textContent = isMotionPaused ? "Play Motion" : "Pause Motion";
+  e.currentTarget.textContent = isMotionPaused ? "Play" : "Pause";
 });

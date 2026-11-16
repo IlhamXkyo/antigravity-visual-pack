@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Autonomous Visual &amp; Web Engineering Suite — Setup Kerja Awal &amp; 5 Modul Skill AI</title>
-  <meta name="description" content="Paket kurasi setup lingkungan kerja AI 3-Tier (GEMINI.md, SKILL.md, DESIGN.md) dan 5 skill visual modern (Motion Graphics, Web Motion GSAP+Lenis, UI-Modern, Three.js r186, dan REA Forensics) untuk Gemini Hydrogen &amp; Argon." />
-  <meta name="theme-color" content="#08090d" />
+  <title>Autonomous Visual &amp; Web Skill Store — Storyscroll Showcase &amp; Paket Setup Ilham</title>
+  <meta name="description" content="Katalog skill visual, motion graphics, koreografi web GSAP+Lenis, UI-Modern Tailwind v4, Three.js r186 WebGPU, dan Setup Kerja Awal 3-Tier dengan protokol Grill-Me." />
+  <meta name="theme-color" content="#07080c" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=JetBrains+Mono:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet" />
@@ -21,578 +21,616 @@
 </head>
 <body>
 
-  <!-- Ambient Spotlight & Top Scroll Progress -->
+  <!-- Ambient Spotlight, Progress Bar & Fullscreen Fox Playground -->
   <div class="ambient-spotlight" aria-hidden="true"></div>
   <div class="scroll-progress" aria-hidden="true">
     <div class="scroll-progress__bar" id="scroll-progress-bar"></div>
   </div>
-
-  <!-- Full-Viewport Interactive Origami Fox Playground -->
   <canvas id="fox-playground-canvas" aria-hidden="true"></canvas>
 
-  <!-- Sticky Docked Navigation -->
+  <!-- Sticky Navigation -->
   <header class="navbar">
     <div class="navbar__inner">
-      <a href="#hero" class="brand">
-        <span class="brand__icon">AV</span>
-        <span>Visual &amp; Web Engineering Suite</span>
+      <a href="#top" class="brand">
+        <span class="brand__badge">AV</span>
+        <span>Visual &amp; Web Skill Store</span>
       </a>
 
-      <nav class="nav-links" aria-label="Navigasi Bab">
-        <a href="#hero" class="nav-link active" data-sec="hero">01. Ikhtisar &amp; 3D</a>
-        <a href="#setup" class="nav-link" data-sec="setup">02. Setup Kerja Awal</a>
-        <a href="#skills" class="nav-link" data-sec="skills">03. 5 Skill &amp; Demo Live</a>
-        <a href="#engines" class="nav-link" data-sec="engines">04. Hydrogen &amp; Argon</a>
-        <a href="#package" class="nav-link" data-sec="package">05. Paket Drive</a>
+      <nav class="nav-links" aria-label="Navigasi Halaman">
+        <a href="#storyscroll" class="nav-link active">01. Storyscroll 6 Modul</a>
+        <a href="#pricing" class="nav-link">02. Estimasi Harga &amp; Paket</a>
+        <a href="#contact-ilham" class="nav-link">03. Beli &amp; Hubungi Ilham</a>
       </nav>
 
       <div class="nav-actions">
-        <button type="button" class="btn btn--sm btn--primary" id="btn-nav-fox" title="Panggil kejutan rubah studio">
+        <button type="button" class="btn btn--sm btn--primary" id="btn-nav-surprise" title="Panggil kejutan rubah interaktif">
           🦊 Kejutan Rubah
         </button>
         <button type="button" class="btn btn--sm" id="btn-pause-motion">
-          Pause Motion
+          Pause
         </button>
         <button type="button" class="btn btn--sm" id="btn-theme-toggle">
-          ☀ Mode Terang
+          ☀ Terang
         </button>
       </div>
     </div>
   </header>
 
-  <main>
+  <main id="top">
 
     <!-- ====================================================================
-         BAB 01: HERO & REAL-TIME THREE.JS r186 3D ARCHITECTURAL STAGE
+         HERO SECTION
          ==================================================================== -->
-    <section class="story-section" id="hero">
+    <section class="hero-section">
       <div class="container">
-        <div class="hero-grid">
-          <div>
-            <div class="eyebrow">BAB 01 // ARSITEKTUR VISUAL &amp; LINGKUNGAN PENGEMBANGAN AI</div>
-            <h1 class="hero-title">
-              Setup Kerja yang Tertata &amp; <span class="serif-italic">Visual</span> yang Terukur.
-            </h1>
-            <p class="hero-desc">
-              Paket lengkap berisi <strong>Setup Lingkungan Pengembangan Awal (3-Tier Context Architecture)</strong> dan <strong>5 Modul Skill Visual &amp; Web Modern</strong> (Motion Graphics, Koreografi Web GSAP + Lenis, Sistem Desain Taktil, 3D WebGL r186, dan Forensik UI) yang siap berjalan di <strong>Gemini Hydrogen</strong> maupun <strong>Gemini Argon</strong>.
-            </p>
+        <div class="eyebrow">STACK VISUAL &amp; ARSITEKTUR MODERN 2026 // GEMINI HYDROGEN &amp; ARGON READY</div>
+        <h1 class="hero-headline">
+          Ubah AI Kamu Jadi <span class="serif">Studio Visual</span> &amp; Web yang Tertata Sejak Awal.
+        </h1>
+        <p class="hero-sub">
+          Gulir ke bawah untuk menjelajahi <strong>6 Modul Skill &amp; Setup Kerja Awal</strong> lewat panggung interaktif. Setiap skill sudah mendukung <strong>Stack Modern 2026</strong> (Tailwind v4, <code>motion/react</code>, View Transitions, GSAP 3.13 + Lenis, Three.js r186 WebGPU, Remotion v4) serta dilengkapi <strong>Protokol Grill-Me (3 Pilihan Cara Planning)</strong> saat prompt kamu masih abu-abu.
+        </p>
 
-            <div class="hero-cta-group">
-              <a href="#setup" class="btn btn--primary">Lihat Setup Kerja Awal</a>
-              <a href="#skills" class="btn">Coba 5 Simulasi Live</a>
-              <button type="button" class="btn" id="btn-hero-orb">✨ Lempar Orb ke Rubah 3D</button>
-            </div>
+        <div class="hero-actions">
+          <a href="#storyscroll" class="btn btn--primary">Mulai Jelajah Storyscroll ↓</a>
+          <a href="#pricing" class="btn">Lihat Estimasi Harga &amp; Bundling</a>
+          <button type="button" class="btn" id="btn-hero-orb">✨ Lempar Orb ke Panggung 3D</button>
+        </div>
 
-            <div class="hero-pillars">
-              <div class="pillar-chip">
-                <div class="pillar-chip__val tabular">3-Tier Setup</div>
-                <div class="pillar-chip__lbl">GEMINI.md · SKILL.md · DESIGN.md</div>
-              </div>
-              <div class="pillar-chip">
-                <div class="pillar-chip__val tabular">5 + 1 Modul</div>
-                <div class="pillar-chip__lbl">Skill Visual, Web, 3D &amp; Arsitektur</div>
-              </div>
-              <div class="pillar-chip">
-                <div class="pillar-chip__val tabular">Hydrogen &amp; Argon</div>
-                <div class="pillar-chip__lbl">Adaptif: Mode Fast, Standard, Deep</div>
-              </div>
-            </div>
+        <div class="hero-metrics">
+          <div class="metric-card">
+            <div class="metric-card__val tabular">Mulai Rp 95rb</div>
+            <div class="metric-card__lbl">Harga Eceran per Modul / Setup</div>
           </div>
-
-          <!-- Right: Live Three.js r186 3D Stage -->
-          <div class="concentric-card">
-            <div class="stage-3d-wrap">
-              <div class="stage-3d-bar">
-                <span>● THREE.JS r186 // REAL-TIME PROCEDURAL STAGE</span>
-                <span class="tabular" id="fps-readout">60 FPS · THREE.Timer</span>
-              </div>
-
-              <div id="webgl-stage" role="region" aria-label="Kanvas 3D Interaktif. Geser untuk memutar model."></div>
-
-              <div class="stage-3d-controls">
-                <div class="mode-pills" role="group" aria-label="Pilih Model 3D">
-                  <button type="button" class="mode-pill active" data-3d="fox">🦊 Origami Fox</button>
-                  <button type="button" class="mode-pill" data-3d="core">💎 Exploded Core</button>
-                  <button type="button" class="mode-pill" data-3d="wire">📐 Wireframe</button>
-                </div>
-                <button type="button" class="btn btn--sm btn--primary" id="btn-3d-pulse">Pulsa 360°</button>
-              </div>
-            </div>
+          <div class="metric-card">
+            <div class="metric-card__val tabular" style="color:var(--accent-lime);">Rp 349rb (Full)</div>
+            <div class="metric-card__lbl">Paket Lengkap 5 Skill + Bonus Setup Awal</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card__val tabular">Grill-Me Gate</div>
+            <div class="metric-card__lbl">3 Pilihan Planning Saat Prompt Abu-Abu</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-card__val tabular">1-Baris Setup</div>
+            <div class="metric-card__lbl">AI Kamu yang Pasang Sendiri dari Drive</div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ====================================================================
-         BAB 02: SETUP KERJAAN AWAL (THE 3-TIER AUTONOMOUS WORKSPACE)
+         STICKY STAGE STORYSCROLL (LEFT: 6 NARRATIVE STEPS | RIGHT: STICKY STAGE)
          ==================================================================== -->
-    <section class="story-section" id="setup">
+    <section class="storyscroll-section" id="storyscroll">
       <div class="container">
-        <div class="eyebrow">BAB 02 // BONUS UTAMA: SETUP KERJAAN AWAL</div>
-        <h2 class="section-title">Mengapa Setup Lingkungan Kerja Lebih Penting dari Sekadar Prompt?</h2>
-        <p class="section-lead">
-          Tanpa penataan awal, AI sering mengarang dependensi fiktif, membuat tampilan UI generik yang belang-belang, dan memboroskan puluhan ribu token. Paket ini menata ruang kerjamu sejak awal dengan <strong>Arsitektur 3-Lapis (Three-Tier Context Architecture)</strong>.
-        </p>
-
-        <div class="blueprint-grid">
-          <div class="tier-stack" role="tablist" aria-label="Tiga Lapisan Setup Kerja Awal">
-            <button type="button" class="tier-btn active" data-tier="tier1" role="tab">
-              <div class="tier-btn__top">
-                <span class="tier-badge">LAPIS 01 // GLOBAL GUARDRAILS</span>
-                <span class="mono" style="color:var(--text-muted);">~/.gemini/GEMINI.md</span>
-              </div>
-              <div class="tier-title">Aturan Berpikir &amp; Progressive Disclosure</div>
-              <p class="tier-desc">
-                Mengatur disiplin koding (cek <code>package.json</code> sebelum menulis kode, perubahan presisi bedah, zero placeholder <code>// TODO</code>) dan memuat skill hanya saat dipanggil agar konteks tetap hemat.
-              </p>
-            </button>
-
-            <button type="button" class="tier-btn" data-tier="tier2" role="tab">
-              <div class="tier-btn__top">
-                <span class="tier-badge">LAPIS 02 // MODULAR SKILL ROUTERS</span>
-                <span class="mono" style="color:var(--text-muted);">plugins/*/SKILL.md</span>
-              </div>
-              <div class="tier-title">5 Skill Visual + Arsitektur 4-Layer Headless</div>
-              <p class="tier-desc">
-                Memisahkan logika bisnis (<code>src/core/</code>) dari komponen tampilan (<code>src/features/</code>) melalui <code>/architect</code>, serta menyediakan skrip verifikasi otomatis (<code>scene_qa.py</code> &amp; <code>media_verify.py</code>).
-              </p>
-            </button>
-
-            <button type="button" class="tier-btn" data-tier="tier3" role="tab">
-              <div class="tier-btn__top">
-                <span class="tier-badge">LAPIS 03 // VISUAL DESIGN CONTRACT</span>
-                <span class="mono" style="color:var(--text-muted);">project/DESIGN.md</span>
-              </div>
-              <div class="tier-title">Kontrak Token Visual &amp; 7 Preset Brand</div>
-              <p class="tier-desc">
-                Mengunci palet permukaan 4-layer, skala tipografi, rumus radius konsentris, dan aturan anti-slop di tingkat proyek agar AI tidak pernah mencampur gaya visual yang bertabrakan.
-              </p>
-            </button>
-          </div>
-
-          <div class="code-window">
-            <div class="code-window__bar">
-              <span id="tier-window-title">Lapis 01 // ~/.gemini/GEMINI.md (Global Workspace Rules)</span>
-              <div class="window-dots"><i></i><i></i><i></i></div>
-            </div>
-            <div class="code-window__body tabular" id="tier-window-code"><span class="hl-muted"># 1. Disiplin Rekayasa Kode (Karpathy Guardrails)</span>
-- <span class="hl-lime">Think Before Coding</span>: Periksa package.json / pyproject.toml nyata sebelum menulis import.
-- <span class="hl-lime">Simplicity First</span>: Tulis kode seminimal mungkin yang menyelesaikan masalah nyata, zero // TODO.
-- <span class="hl-lime">Surgical Changes</span>: Sentuh hanya file yang berkaitan dengan tugas, bersihkan import yatim.
-
-<span class="hl-muted"># 2. Progressive Disclosure (On-Demand Skill Routing)</span>
-Jangan menumpuk seluruh instruksi di awal sesi. Muat SKILL.md hanya saat dipanggil:
-  • <span class="hl-teal">/architect</span>  -&gt; pro-architect (4-Layer Headless Engine vs UI)
-  • <span class="hl-teal">/ui-modern</span>  -&gt; ui-modern + design-md (Concentric Math &amp; 4-Layer Surface)
-  • <span class="hl-teal">/motionilo</span>  -&gt; motionilo + scene_qa.py (Programmatic Video &amp; Safe-Area Gate)
-  • <span class="hl-teal">web-motion</span>  -&gt; GSAP 3.13 + Lenis Single Ticker Loop
-  • <span class="hl-teal">threejs-dev</span> -&gt; Three.js r186 THREE.Timer &amp; WebGPU Shaders
-  • <span class="hl-teal">/rea</span>        -&gt; Clean-Room Forensic UI &amp; Motion Reconstruction</div>
-          </div>
+        <div style="margin-bottom: 1.5rem;">
+          <div class="eyebrow">INTERACTIVE STORYSCROLL // GULIR UNTUK MENGUBAH PANGGUNG DI KANAN</div>
+          <h2 style="font-family:var(--font-display); font-size:clamp(1.75rem, 3.2vw, 2.65rem); letter-spacing:-0.03em;">
+            Satu Panggung Interaktif, Enam Modul Spesialis.
+          </h2>
         </div>
 
-        <div class="compare-strip">
-          <div class="compare-box">
-            <div class="mono" style="color:var(--accent-coral); margin-bottom:0.4rem;">✕ TANPA SETUP KERJA AWAL</div>
-            <p style="font-size:0.86rem; color:var(--text-secondary);">
-              AI menebak library yang belum terinstal, mencampur warna neon acak, memakai API usang (seperti <code>THREE.Clock</code>), dan memuat semua instruksi sekaligus hingga konteks cepat penuh.
-            </p>
+        <div class="storyscroll-grid">
+
+          <!-- LEFT: SCROLLING NARRATIVE TRACK (6 STEPS) -->
+          <div class="narrative-track">
+
+            <!-- STEP 01: SETUP KERJA AWAL + GRILL-ME PROTOCOL -->
+            <article class="story-step is-active" data-step="0" id="step-0">
+              <div class="story-step__inner">
+                <div class="step-top-row">
+                  <span class="step-badge">BAB 01 // BONUS UTAMA: SETUP KERJA AWAL</span>
+                  <span class="step-price-tag">Rp 95.000 (GRATIS di Paket Full)</span>
+                </div>
+                <h3 class="step-title">Setup Lingkungan 3-Tier &amp; Protokol Grill-Me</h3>
+                <p class="step-desc">
+                  Menata fondasi kerja AI kamu dari nol (`GEMINI.md`, `SKILL.md`, `DESIGN.md` + `/architect` 4-layer headless). Dilengkapi <strong>Gerbang Klarifikasi Grill-Me</strong>: kalau prompt kamu sudah jelas, AI langsung eksekusi; tapi kalau prompt masih abu-abu, AI wajib bertanya dulu dan memberi <strong>3 pilihan cara planning</strong>.
+                </p>
+                <ul class="step-points">
+                  <li><strong>Opsi 1 (AI Full Planning)</strong>: AI yang merancang semua spesifikasi dari awal sampai eksekusi.</li>
+                  <li><strong>Opsi 2 (Pemilik yang Planning)</strong>: Kamu yang tentukan rencana utamanya, AI tinggal mengikuti.</li>
+                  <li><strong>Opsi 3 (Planning Bareng Sambil Tanya-Jawab)</strong>: Merancang bersama lewat wawancara singkat bertahap.</li>
+                </ul>
+                <div class="step-footer">
+                  <span class="mono" style="color:var(--text-muted);">Coba klik 3 opsi planning di panggung kanan →</span>
+                  <button type="button" class="btn btn--sm btn--primary" data-toggle-cart="setup">✓ Masuk di Paket</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- STEP 02: UI-MODERN v2.1 + TAILWIND v4 + DESIGN.MD -->
+            <article class="story-step" data-step="1" id="step-1">
+              <div class="story-step__inner">
+                <div class="step-top-row">
+                  <span class="step-badge">BAB 02 // SKILL 01: /UI-MODERN &amp; DESIGN.MD</span>
+                  <span class="step-price-tag">Estimasi Eceran: Rp 110.000</span>
+                </div>
+                <h3 class="step-title">Sistem Desain Taktil, Tailwind v4 `@theme` &amp; Primitives Kit</h3>
+                <p class="step-desc">
+                  Menerapkan standar CSS modern 2026: konfigurasi CSS-first <strong>Tailwind v4 (`@theme`)</strong>, hierarki permukaan 4-lapis, rumus radius konsentris <code>calc(var(--radius) - var(--padding))</code>, fisika tekan tombol 50ms, serta menyertakan <strong>7 komponen primitif asli + Playwright E2E runner</strong>.
+                </p>
+                <ul class="step-points">
+                  <li>Bebas tampilan generik AI: kontras terukur, border hairline, dan angka <code>tabular-nums</code>.</li>
+                  <li>Termasuk 7 preset brand <code>DESIGN.md</code> (Linear, Vercel, Apple, Raycast, Claude, PostHog, CAD).</li>
+                  <li>Mendukung penuh <code>@starting-style</code> dan <code>transition-behavior: allow-discrete</code>.</li>
+                </ul>
+                <div class="step-footer">
+                  <span class="mono" style="color:var(--text-muted);">Geser kalkulator radius di panggung kanan →</span>
+                  <button type="button" class="btn btn--sm btn--primary" data-toggle-cart="uimodern">✓ Masuk di Paket</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- STEP 03: WEB-MOTION (GSAP 3.13 + LENIS + MOTION/REACT + VIEW TRANSITIONS) -->
+            <article class="story-step" data-step="2" id="step-2">
+              <div class="story-step__inner">
+                <div class="step-top-row">
+                  <span class="step-badge">BAB 03 // SKILL 02: WEB-MOTION CHOREOGRAPHY</span>
+                  <span class="step-price-tag">Estimasi Eceran: Rp 120.000</span>
+                </div>
+                <h3 class="step-title">GSAP 3.13+, Lenis, `motion/react` &amp; View Transitions API</h3>
+                <p class="step-desc">
+                  Router rekayasa animasi web paling mutakhir: menggabungkan <strong>Native CSS `view-timeline`</strong> dan <strong>View Transitions API</strong> untuk performa compositor ringan, <strong>`motion/react` (v12+)</strong> untuk state komponen React 19, serta <strong>GSAP 3.13+ &amp; Lenis</strong> untuk koreografi storyscroll.
+                </p>
+                <ul class="step-points">
+                  <li>Sinkronisasi satu loop tunggal <code>gsap.ticker</code> + <code>lenis.raf(t * 1000)</code> bebas jitter.</li>
+                  <li>Resep siap pakai untuk SplitText, Flip layout, dan transisi halaman App Router.</li>
+                  <li>Dilengkapi skrip <code>media_verify.py</code> untuk cek otomatis FPS dan resolusi video.</li>
+                </ul>
+                <div class="step-footer">
+                  <span class="mono" style="color:var(--text-muted);">Uji balap kurva fisika di panggung kanan →</span>
+                  <button type="button" class="btn btn--sm btn--primary" data-toggle-cart="webmotion">✓ Masuk di Paket</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- STEP 04: MOTIONILO + REMOTION v4 + SCENE_QA.PY -->
+            <article class="story-step" data-step="3" id="step-3">
+              <div class="story-step__inner">
+                <div class="step-top-row">
+                  <span class="step-badge">BAB 04 // SKILL 03: /MOTIONILO + REMOTION v4</span>
+                  <span class="step-price-tag">Estimasi Eceran: Rp 135.000</span>
+                </div>
+                <h3 class="step-title">Produksi Motion Graphics Flat-3D &amp; Gate `scene_qa.py`</h3>
+                <p class="step-desc">
+                  Arsitek produksi video terprogram berbasis <strong>Remotion v4</strong> untuk video explainer, kinetic typography/musik, dan promo produk (`9:16` Reels/TikTok, `16:9` YouTube, `1:1` Feed). Dilengkapi validator mesin <code>scene_qa.py</code> dan generator contact sheet <code>storyboard.py</code>.
+                </p>
+                <ul class="step-points">
+                  <li>Otomatis mengecek 47 aturan matematis: Safe-Area, durasi 1.5-6s, kontras WCAG, dan CPS subtitle.</li>
+                  <li>Komposisi 3-plane parallax (background `0.4x`, midground `1.0x`, foreground `1.2x`).</li>
+                  <li>Tersedia mode cepat untuk Gemini Hydrogen dan mode audit penuh untuk Gemini Argon.</li>
+                </ul>
+                <div class="step-footer">
+                  <span class="mono" style="color:var(--text-muted);">Putar player video live di panggung kanan →</span>
+                  <button type="button" class="btn btn--sm btn--primary" data-toggle-cart="motionilo">✓ Masuk di Paket</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- STEP 05: THREE.JS r186 & WEBGPU 3D SCENE ROUTER -->
+            <article class="story-step" data-step="4" id="step-4">
+              <div class="story-step__inner">
+                <div class="step-top-row">
+                  <span class="step-badge">BAB 05 // SKILL 04: THREE.JS r186 &amp; WEBGPU</span>
+                  <span class="step-price-tag">Estimasi Eceran: Rp 125.000</span>
+                </div>
+                <h3 class="step-title">Three.js r186, WebGPU TSL Node Shaders &amp; R3F 9.8</h3>
+                <p class="step-desc">
+                  Mengunci standar terbaru 3D browser agar AI tidak pernah menulis kode usang: wajib menggunakan <code>THREE.Timer</code> (bukan <code>Clock</code>), <code>HDRLoader</code> (bukan <code>RGBELoader</code>), <code>WebGPURenderer</code> dengan TSL Node Shaders, serta kompresi aset <code>gltf-transform</code> 4.5.
+                </p>
+                <ul class="step-points">
+                  <li>Sinkronisasi kamera dan *Exploded View* 3D langsung dengan posisi scroll pengunjung.</li>
+                  <li>13 modul referensi terpisah: PBR materials, lighting, post-processing, instancing, dan R3F.</li>
+                  <li>Disiplin pembersihan memori GPU (<code>dispose()</code>) dan batas pixelRatio aman untuk HP &amp; laptop.</li>
+                </ul>
+                <div class="step-footer">
+                  <span class="mono" style="color:var(--text-muted);">Mainkan mode Exploded 3D di panggung kanan →</span>
+                  <button type="button" class="btn btn--sm btn--primary" data-toggle-cart="threejs">✓ Masuk di Paket</button>
+                </div>
+              </div>
+            </article>
+
+            <!-- STEP 06: REA CLEAN-ROOM FORENSICS -->
+            <article class="story-step" data-step="5" id="step-5">
+              <div class="story-step__inner">
+                <div class="step-top-row">
+                  <span class="step-badge">BAB 06 // SKILL 05: /REA CLEAN-ROOM FORENSICS</span>
+                  <span class="step-price-tag">Estimasi Eceran: Rp 110.000</span>
+                </div>
+                <h3 class="step-title">Reverse Engineer Anything &amp; Sintesis Kode Bersih</h3>
+                <p class="step-desc">
+                  Mesin bedah forensik untuk mengekstrak kurva gerak <code>cubic-bezier</code>, parameter pegas, geometri radius, dan struktur state dari website referensi mana pun, lalu merekonstruksinya menjadi kode produksi bersih tanpa plagiasi aset.
+                </p>
+                <ul class="step-points">
+                  <li>5 fase dekonstruksi: Reconnaissance, Forensic Extract, State Mapping, Clean-Room, Verification.</li>
+                  <li>Menyertakan skrip ekstraksi animasi otomatis <code>extract_animation.py</code>.</li>
+                  <li>Zero placeholder: hasil sintesis langsung jalan tanpa menyisakan komentar <code>// TODO</code>.</li>
+                </ul>
+                <div class="step-footer">
+                  <span class="mono" style="color:var(--text-muted);">Geser lensa X-Ray di panggung kanan →</span>
+                  <button type="button" class="btn btn--sm btn--primary" data-toggle-cart="rea">✓ Masuk di Paket</button>
+                </div>
+              </div>
+            </article>
+
           </div>
-          <div class="compare-box compare-box--good">
-            <div class="mono" style="color:var(--accent-lime); margin-bottom:0.4rem;">✓ DENGAN SETUP 3-TIER INI</div>
-            <p style="font-size:0.86rem; color:var(--text-secondary);">
-              Lingkungan langsung tertata: token visual terkunci di <code>DESIGN.md</code>, skill hanya dimuat sesuai kebutuhan (mode <code>fast | standard | deep</code>), dan hasil diverifikasi oleh skrip mesin.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- ====================================================================
-         BAB 03: 5 MODUL SKILL & SIMULASI LIVE (100% CODE-RENDERED)
-         ==================================================================== -->
-    <section class="story-section" id="skills">
-      <div class="container">
-        <div class="eyebrow">BAB 03 // 5 MODUL SKILL VISUAL &amp; CONTOH IMPLEMENTASI LIVE</div>
-        <h2 class="section-title">Semua Contoh di Bawah Ini Berjalan Langsung dengan Kode.</h2>
-        <p class="section-lead">
-          Bukan tangkapan layar statis. Coba langsung setiap panggung simulasi di bawah ini untuk merasakan hasil implementasi dari masing-masing skill.
-        </p>
+          <!-- RIGHT: THE STICKY MORPHING INTERACTIVE STAGE -->
+          <div class="sticky-stage-col">
+            <div class="stage-frame">
+              <div class="stage-frame__inner">
 
-        <div class="skills-showcase-list">
-
-          <!-- SKILL 01: MOTIONILO & REMOTION v4 -->
-          <article class="concentric-card">
-            <div class="concentric-card__inner skill-showcase-row">
-              <div>
-                <div class="eyebrow" style="margin-bottom:0.6rem;">MODUL 01 // /MOTIONILO + REMOTION v4</div>
-                <h3 style="font-family:var(--font-display); font-size:1.5rem; line-height:1.18;">
-                  Motion Graphics Flat-3D &amp; Gate <code>scene_qa.py</code>
-                </h3>
-                <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.5rem;">
-                  Menyusun storyboard JSON, menghitung batas Safe-Area untuk TikTok/Reels (`9:16`), YouTube (`16:9`), dan Feed (`1:1`), mengatur kedalaman parallax 3-lapis, serta memvalidasi durasi, kontras WCAG, dan kecepatan baca subtitle secara otomatis.
-                </p>
-                <ul class="skill-meta-list">
-                  <li>Gate otomatis <code>scene_qa.py</code> (47 pemeriksaan matematis sebelum render).</li>
-                  <li>Generator visual <code>storyboard.py</code> untuk pratinjau zona aman.</li>
-                  <li>Mendukung 3 tipe produksi: Story/Explainer, Kinetic Music, dan Brand Promo.</li>
-                </ul>
-                <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
-                  <button type="button" class="btn btn--sm btn--primary" data-ratio="9:16">Rasio 9:16 Reels</button>
-                  <button type="button" class="btn btn--sm" data-ratio="16:9">Rasio 16:9 YouTube</button>
-                  <button type="button" class="btn btn--sm" data-ratio="1:1">Rasio 1:1 Square</button>
-                </div>
-              </div>
-
-              <!-- Procedural Live Motion Graphics Player -->
-              <div class="mograph-player">
-                <div class="mograph-screen-wrap">
-                  <div class="mograph-viewport" id="mg-viewport" style="width: 175px; height: 245px;">
-                    <div class="mograph-safe-guide" id="mg-safe-guide" style="inset: 12% 10% 20% 10%;">
-                      <span>SAFE ZONE</span>
-                      <span class="tabular" id="mg-ratio-tag">9:16</span>
-                    </div>
-
-                    <div class="mograph-plane-bg" id="mg-bg-orb"></div>
-
-                    <div class="mograph-plane-mid" id="mg-mid-card">
-                      <div class="mono" style="font-size:0.58rem; color:var(--accent-lime);" id="mg-beat-label">SCENE 01 // HOOK</div>
-                      <div style="font-family:var(--font-display); font-weight:700; font-size:0.82rem; margin-top:2px;" id="mg-headline">
-                        Ritme Visual Terukur
-                      </div>
-                      <div class="mograph-bars" id="mg-bars">
-                        <div class="mograph-bar"></div>
-                        <div class="mograph-bar"></div>
-                        <div class="mograph-bar"></div>
-                        <div class="mograph-bar"></div>
-                        <div class="mograph-bar"></div>
-                      </div>
-                    </div>
-
-                    <div class="mograph-sub-pill" id="mg-subtitle">
-                      Subtitle <= 20 CPS di zona aman
-                    </div>
+                <!-- Stage Header -->
+                <div class="stage-header">
+                  <span class="mono" style="color:var(--accent-lime);" id="stage-active-label">
+                    ● STAGE AKTIF: BAB 01 // SETUP &amp; GRILL-ME
+                  </span>
+                  <div class="stage-step-dots" role="tablist" aria-label="Pilih Bab Panggung">
+                    <button type="button" class="stage-dot-btn active" data-goto-step="0">01</button>
+                    <button type="button" class="stage-dot-btn" data-goto-step="1">02</button>
+                    <button type="button" class="stage-dot-btn" data-goto-step="2">03</button>
+                    <button type="button" class="stage-dot-btn" data-goto-step="3">04</button>
+                    <button type="button" class="stage-dot-btn" data-goto-step="4">05</button>
+                    <button type="button" class="stage-dot-btn" data-goto-step="5">06</button>
                   </div>
                 </div>
 
-                <div class="mograph-controls">
-                  <button type="button" class="btn btn--sm btn--primary" id="btn-mg-play">⏸ Pause</button>
-                  <input type="range" class="mograph-scrubber" id="mg-scrubber" min="0" max="300" value="0" aria-label="Timeline frame scrubber" />
-                  <span class="mono" id="mg-frame-readout">F: 000 / 300</span>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- SKILL 02: UI-MODERN v2.1 & DESIGN.MD -->
-          <article class="concentric-card">
-            <div class="concentric-card__inner skill-showcase-row">
-              <div>
-                <div class="eyebrow" style="margin-bottom:0.6rem;">MODUL 02 // /UI-MODERN v2.1 + DESIGN.MD</div>
-                <h3 style="font-family:var(--font-display); font-size:1.5rem; line-height:1.18;">
-                  Geometri Radius Konsentris &amp; Sistem Token 4-Layer
-                </h3>
-                <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.5rem;">
-                  Menghilangkan tampilan UI amatir dengan rumus matematis <code>Inner Radius = Outer Radius - Padding</code>, hierarki kedalaman 4 lapis permukaan, fisika tekan tombol 50ms, serta paket kode komponen primitif (<code>primitives-kit/</code>) yang siap dipakai.
-                </p>
-                <ul class="skill-meta-list">
-                  <li>7 komponen primitif mandiri + Playwright E2E runner disertakan di dalam paket.</li>
-                  <li>7 preset <code>DESIGN.md</code> (Linear, Vercel, Apple, Raycast, Claude, PostHog, CAD).</li>
-                  <li>Menjamin 7 state interaktif lengkap dan angka <code>tabular-nums</code>.</li>
-                </ul>
-              </div>
-
-              <!-- Live Concentric Geometry Lab -->
-              <div style="background:var(--bg-panel); border:1px solid var(--border-hairline); border-radius:14px; padding:1.15rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span class="mono" style="color:var(--accent-lime);">LIVE CONCENTRIC CALCULATOR</span>
-                  <span class="mono" id="calc-formula-badge" style="color:var(--accent-teal);">24px - 8px = 16px</span>
-                </div>
-
-                <div class="range-row">
-                  <span>Outer Radius: <strong id="val-r-out">24px</strong></span>
-                  <input type="range" id="inp-r-out" min="10" max="38" value="24" />
-                </div>
-                <div class="range-row">
-                  <span>Container Padding: <strong id="val-pad">8px</strong></span>
-                  <input type="range" id="inp-pad" min="4" max="22" value="8" />
-                </div>
-
-                <div class="concentric-demo-outer" id="demo-outer" style="border-radius: 24px; padding: 8px;">
-                  <div class="concentric-demo-inner tabular" id="demo-inner" style="border-radius: 16px;">
-                    Inner Radius = <strong style="color:var(--accent-lime);" id="val-r-in">16px</strong> · Sudut Selaras Presisi
+                <!-- Real-Time Three.js r186 3D Viewport (Morphs Camera & Exploded View per Step!) -->
+                <div id="sticky-webgl-wrap" role="region" aria-label="Panggung 3D Three.js r186 Interaktif">
+                  <div class="webgl-overlay-tag" id="webgl-state-tag">
+                    3D STATE: ORIGAMI FOX COMPANION · 60 FPS
+                  </div>
+                  <div class="webgl-overlay-controls">
+                    <button type="button" class="btn btn--sm" id="btn-stage-wire" style="padding:3px 8px; font-size:0.65rem;">Wireframe</button>
+                    <button type="button" class="btn btn--sm btn--primary" id="btn-stage-jump" style="padding:3px 9px; font-size:0.65rem;">Lompat 360°</button>
                   </div>
                 </div>
-              </div>
-            </div>
-          </article>
 
-          <!-- SKILL 03: WEB-MOTION (GSAP 3.13 + LENIS) -->
-          <article class="concentric-card">
-            <div class="concentric-card__inner skill-showcase-row">
-              <div>
-                <div class="eyebrow" style="margin-bottom:0.6rem;">MODUL 03 // WEB-MOTION (GSAP 3.13+ &amp; LENIS)</div>
-                <h3 style="font-family:var(--font-display); font-size:1.5rem; line-height:1.18;">
-                  Koreografi Scroll &amp; Kurva Fisika 60fps
-                </h3>
-                <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.5rem;">
-                  Mengatur sinkronisasi tunggal antara Lenis smooth scroll, GSAP ScrollTrigger, dan Three.js dalam satu ticker loop agar bebas stutter, serta mengunci animasi hanya pada properti compositor GPU (<code>transform</code> dan <code>opacity</code>).
-                </p>
-                <ul class="skill-meta-list">
-                  <li>Pola kanonik <code>gsap.ticker.add((t) =&gt; lenis.raf(t * 1000))</code> dengan <code>lagSmoothing(0)</code>.</li>
-                  <li>Resep siap pakai untuk SplitText, Flip layout, dan transisi halaman.</li>
-                  <li>Dilengkapi <code>media_verify.py</code> untuk menguji FPS dan resolusi hasil render.</li>
-                </ul>
-              </div>
+                <!-- Dynamic Interactive Deck (Automatically switches as user scrolls steps 0..5!) -->
+                <div class="stage-deck">
 
-              <!-- Live Easing Comparison Track -->
-              <div style="background:var(--bg-panel); border:1px solid var(--border-hairline); border-radius:14px; padding:1.15rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span class="mono" style="color:var(--accent-lime);">LIVE EASING &amp; SPRING LAB</span>
-                  <button type="button" class="btn btn--sm btn--primary" id="btn-run-easing">▶ Uji Kurva Gerak</button>
-                </div>
-
-                <div class="easing-lanes">
-                  <div class="easing-lane">
-                    <div class="easing-lane__head">
-                      <span style="color:var(--accent-coral);">✕ Linear (Kaku / Ditolak Gate)</span>
-                      <span>linear</span>
-                    </div>
-                    <div class="easing-puck" id="puck-linear" style="background:var(--accent-coral);"></div>
-                  </div>
-
-                  <div class="easing-lane">
-                    <div class="easing-lane__head">
-                      <span style="color:var(--accent-teal);">✓ Expo Out (Micro-Interaction)</span>
-                      <span>cubic-bezier(0.16, 1, 0.3, 1)</span>
-                    </div>
-                    <div class="easing-puck" id="puck-expo" style="background:var(--accent-teal);"></div>
-                  </div>
-
-                  <div class="easing-lane">
-                    <div class="easing-lane__head">
-                      <span style="color:var(--accent-lime);">✓ Calibrated Spring (Natural Overshoot)</span>
-                      <span>damping: 20, stiffness: 120</span>
-                    </div>
-                    <div class="easing-puck" id="puck-spring"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- SKILL 04 & 05: THREE.JS r186 + REA FORENSIC X-RAY -->
-          <article class="concentric-card">
-            <div class="concentric-card__inner skill-showcase-row">
-              <div>
-                <div class="eyebrow" style="margin-bottom:0.6rem;">MODUL 04 &amp; 05 // THREE.JS r186 &amp; REA (/REA)</div>
-                <h3 style="font-family:var(--font-display); font-size:1.5rem; line-height:1.18;">
-                  Standar 3D Modern &amp; Bedah Forensik Clean-Room
-                </h3>
-                <p style="font-size:0.9rem; color:var(--text-secondary); margin-top:0.5rem;">
-                  <code>threejs-dev</code> memastikan AI selalu memakai API Three.js r186 terbaru (<code>THREE.Timer</code>, <code>HDRLoader</code>, WebGPU TSL Shaders), sementara <code>/rea</code> membedah halaman atau animasi web referensi menjadi spesifikasi terukur untuk ditulis ulang secara bersih.
-                </p>
-                <ul class="skill-meta-list">
-                  <li>Ekstraksi presisi kurva <code>cubic-bezier</code>, parameter pegas, dan token permukaan.</li>
-                  <li>13 modul referensi 3D mulai dari PBR lighting, BatchedMesh, hingga kompresi KTX2/Draco.</li>
-                  <li>Menghasilkan kode produksi mandiri tanpa menyisakan placeholder <code>// TODO</code>.</li>
-                </ul>
-              </div>
-
-              <!-- Live REA Forensic X-Ray Slider -->
-              <div style="background:var(--bg-panel); border:1px solid var(--border-hairline); border-radius:14px; padding:1.15rem;">
-                <div class="range-row" style="margin-top:0;">
-                  <span class="mono" style="color:var(--accent-lime);">GESER LENSA X-RAY FORENSIK (/REA):</span>
-                  <strong class="mono" id="val-xray" style="color:var(--accent-teal);">50%</strong>
-                </div>
-                <input type="range" id="inp-xray" min="0" max="100" value="50" style="width:100%; margin-top:0.45rem; accent-color:var(--accent-lime);" aria-label="Slider X-Ray Forensik" />
-
-                <div class="xray-box">
-                  <div class="xray-surface">
+                  <!-- DECK 0: BAB 01 (GRILL-ME 3-CHOICE SIMULATOR) -->
+                  <div class="deck-pane active" data-deck="0">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                      <strong style="font-family:var(--font-display); font-size:1.05rem;">Interactive Card Component</strong>
-                      <span class="tier-badge">SURFACE VIEW</span>
+                      <span class="mono" style="color:var(--accent-lime);">SIMULASI PROTOKOL GRILL-ME (SAAT PROMPT ABU-ABU)</span>
+                      <span class="mono" style="color:var(--text-muted);">Klik salah satu opsi:</span>
                     </div>
-                    <p style="font-size:0.82rem; color:var(--text-secondary);">
-                      Komponen antarmuka hidup yang sedang dianalisis oleh mesin ekstraksi REA.
-                    </p>
-                    <button type="button" class="btn btn--sm btn--primary" style="align-self:flex-start;">Tactile Action (50ms)</button>
+                    <div class="grill-options">
+                      <button type="button" class="grill-opt-btn active" data-grill="opt1">
+                        <strong style="color:var(--accent-lime); display:block;">1. AI Full Plan</strong>
+                        <span>AI rancang semua &amp; langsung eksekusi</span>
+                      </button>
+                      <button type="button" class="grill-opt-btn" data-grill="opt2">
+                        <strong style="color:var(--accent-teal); display:block;">2. Pemilik Plan</strong>
+                        <span>Kamu tentukan arah, AI ikuti persis</span>
+                      </button>
+                      <button type="button" class="grill-opt-btn" data-grill="opt3">
+                        <strong style="color:var(--accent-amber); display:block;">3. Tanya-Jawab</strong>
+                        <span>Diskusi bertahap lewat /grill-me</span>
+                      </button>
+                    </div>
+                    <div class="grill-response-box tabular" id="grill-sim-out">[Prompt Pemilik]: "Buatkan halaman produk untuk aplikasiku" (Masih Abu-Abu)
+[Respon AI dengan Grill-Me Gate]:
+❓ Q1 (Target Stack): Rekomendasi -> Next.js App Router + Tailwind v4 + GSAP.
+❓ Q2 (Cara Kerja Planning): Pilih mode kerja kita:
+  ▸ [Aktif: Opsi 1 - AI Full Planning] Baik, aku susun arsitektur 4-layer, DESIGN.md, dan komponennya dari awal sampai selesai sekarang!</div>
                   </div>
 
-                  <div class="xray-code" id="xray-code-layer">
-                    <div>[REA CLEAN-ROOM EXTRACT // 1-PASS]</div>
-                    <div>• surface-card : #161923 | border: 1px rgba(244,242,237,0.08)</div>
-                    <div>• concentric   : R_outer=20px, pad=6px -&gt; R_inner=14px</div>
-                    <div>• physics      : 50ms cubic-bezier(0.16, 1, 0.3, 1) scale(0.97)</div>
-                    <div>• architecture : src/core (headless) &lt;-&gt; src/features (UI)</div>
+                  <!-- DECK 1: BAB 02 (UI-MODERN CONCENTRIC CALCULATOR) -->
+                  <div class="deck-pane" data-deck="1">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span class="mono" style="color:var(--accent-lime);">UI-MODERN // KALKULATOR RADIUS KONSENTRIS</span>
+                      <span class="mono" style="color:var(--accent-teal);" id="deck-radius-formula">24px - 8px = 16px</span>
+                    </div>
+                    <div class="slider-line">
+                      <span>Outer Radius: <strong id="lbl-r-out">24px</strong></span>
+                      <input type="range" id="rng-r-out" min="10" max="36" value="24" />
+                    </div>
+                    <div class="slider-line">
+                      <span>Padding: <strong id="lbl-r-pad">8px</strong></span>
+                      <input type="range" id="rng-r-pad" min="4" max="20" value="8" />
+                    </div>
+                    <div class="concentric-preview-outer" id="preview-outer-box" style="border-radius:24px; padding:8px;">
+                      <div class="concentric-preview-inner tabular" id="preview-inner-box" style="border-radius:16px;">
+                        Inner Radius = <strong style="color:var(--accent-lime);" id="lbl-r-in">16px</strong> · Sudut Selaras Matematis
+                      </div>
+                    </div>
                   </div>
+
+                  <!-- DECK 2: BAB 03 (WEB-MOTION PHYSICS ARENA) -->
+                  <div class="deck-pane" data-deck="2">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span class="mono" style="color:var(--accent-lime);">WEB-MOTION // ARENA BALAP KURVA EASING</span>
+                      <button type="button" class="btn btn--sm btn--primary" id="btn-deck-race">▶ Jalankan Simulasi</button>
+                    </div>
+                    <div class="motion-lanes">
+                      <div class="motion-lane">
+                        <div class="mono" style="display:flex; justify-content:space-between; font-size:0.64rem; color:var(--accent-coral);">
+                          <span>✕ Linear (Kaku / Ditolak Gate)</span><span>linear</span>
+                        </div>
+                        <div class="motion-puck" id="puck-1" style="background:var(--accent-coral);"></div>
+                      </div>
+                      <div class="motion-lane">
+                        <div class="mono" style="display:flex; justify-content:space-between; font-size:0.64rem; color:var(--accent-teal);">
+                          <span>✓ Expo Out (Tailwind v4 / UI)</span><span>cubic-bezier(0.16, 1, 0.3, 1)</span>
+                        </div>
+                        <div class="motion-puck" id="puck-2" style="background:var(--accent-teal);"></div>
+                      </div>
+                      <div class="motion-lane">
+                        <div class="mono" style="display:flex; justify-content:space-between; font-size:0.64rem; color:var(--accent-lime);">
+                          <span>✓ Calibrated Spring (motion/react &amp; GSAP)</span><span>damping: 20, stiffness: 120</span>
+                        </div>
+                        <div class="motion-puck" id="puck-3"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- DECK 3: BAB 04 (MOTIONILO PROCEDURAL PLAYER & SCENE_QA.PY) -->
+                  <div class="deck-pane" data-deck="3">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+                      <span class="mono" style="color:var(--accent-lime);">MOTIONILO // LIVE SAFE-AREA &amp; QA PLAYER</span>
+                      <div style="display:flex; gap:4px;">
+                        <button type="button" class="btn btn--sm btn--primary" data-mg-ratio="9:16" style="padding:2px 7px; font-size:0.66rem;">9:16</button>
+                        <button type="button" class="btn btn--sm" data-mg-ratio="16:9" style="padding:2px 7px; font-size:0.66rem;">16:9</button>
+                        <button type="button" class="btn btn--sm" data-mg-ratio="1:1" style="padding:2px 7px; font-size:0.66rem;">1:1</button>
+                      </div>
+                    </div>
+                    <div class="mini-mograph-wrap">
+                      <div class="mini-mograph-screen" id="mini-mg-screen">
+                        <div class="mini-safe-box"></div>
+                        <span class="mono" style="font-size:0.55rem; color:var(--accent-teal); position:relative; z-index:2;" id="mini-mg-tag">SAFE 9:16</span>
+                        <div style="background:rgba(255,255,255,0.08); border-radius:6px; padding:6px; position:relative; z-index:2;" id="mini-mg-card">
+                          <div style="font-size:0.65rem; font-weight:700;" id="mini-mg-title">3-Plane Parallax</div>
+                          <div style="height:4px; background:var(--accent-lime); border-radius:2px; margin-top:4px; width:75%;" id="mini-mg-bar"></div>
+                        </div>
+                        <div style="font-size:0.54rem; text-align:center; background:rgba(0,0,0,0.65); border-radius:4px; padding:2px;" id="mini-mg-sub">CPS &le; 20 OK</div>
+                      </div>
+                      <div class="grill-response-box tabular" style="margin:0;">$ python scene_qa.py manifest.json
+<span style="color:var(--accent-lime); font-weight:700;">LULUS (47 pemeriksaan)</span>
+✓ Safe-Rect &amp; Text-Rect 9:16 aman
+✓ Durasi scene 1.5s..6.0s
+✓ Kontras 17.4:1 (&ge; 4.5:1 WCAG)
+✓ Subtitle CPS 7.4 (&le; 20.0)</div>
+                    </div>
+                  </div>
+
+                  <!-- DECK 4: BAB 05 (THREE.JS r186 EXPLODED VIEW CONTROLLER) -->
+                  <div class="deck-pane" data-deck="4">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span class="mono" style="color:var(--accent-lime);">THREE.JS r186 // EXPLODED VIEW &amp; SHADER CONTROL</span>
+                      <span class="mono" style="color:var(--accent-teal);" id="lbl-explode">Explode: 65%</span>
+                    </div>
+                    <div class="slider-line">
+                      <span>Jarak Pecahan Komponen 3D (Exploded View):</span>
+                      <input type="range" id="rng-explode" min="0" max="100" value="65" />
+                    </div>
+                    <div class="grill-response-box tabular" style="margin-top:0.55rem;">// Standar Three.js r186 di dalam paket:
+const timer = new THREE.Timer();
+timer.connect(document); // Menggantikan THREE.Clock yang usang
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));</div>
+                  </div>
+
+                  <!-- DECK 5: BAB 06 (REA FORENSIC X-RAY SCANNER) -->
+                  <div class="deck-pane" data-deck="5">
+                    <div class="slider-line" style="margin-top:0;">
+                      <span class="mono" style="color:var(--accent-lime);">GESER PEMINDAI X-RAY (/REA):</span>
+                      <input type="range" id="rng-xray" min="0" max="100" value="55" />
+                      <strong class="mono" id="lbl-xray" style="color:var(--accent-teal);">55%</strong>
+                    </div>
+                    <div class="mini-xray-box">
+                      <div class="mini-xray-front">
+                        <div style="display:flex; justify-content:space-between;">
+                          <strong style="font-size:0.9rem;">Target UI Component</strong>
+                          <span class="step-badge">LIVE DOM</span>
+                        </div>
+                        <p style="font-size:0.76rem; color:var(--text-secondary);">Tampilan komponen web sebelum dibedah oleh REA.</p>
+                        <span class="btn btn--sm btn--primary" style="align-self:flex-start; pointer-events:none;">Tactile 50ms</span>
+                      </div>
+                      <div class="mini-xray-back" id="xray-back-pane" style="clip-path:inset(0 0 0 45%);">
+                        <div>[REA CLEAN-ROOM SYNTHESIS]</div>
+                        <div>• token : --bg-card #141722 | hairline 8%</div>
+                        <div>• math  : R_in = 22px - 6px = 16px</div>
+                        <div>• curve : cubic-bezier(0.16, 1, 0.3, 1)</div>
+                        <div>• layer : src/core (headless) &lt;-&gt; src/features</div>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         ESTIMASI HARGA PER SKILL, KALKULATOR BUNDLING & HUBUNGI ILHAM
+         ==================================================================== -->
+    <section class="pricing-section" id="pricing">
+      <div class="container">
+        <div class="eyebrow">ESTIMASI HARGA &amp; KALKULATOR PAKET</div>
+        <h2 style="font-family:var(--font-display); font-size:clamp(1.85rem, 3.6vw, 3rem); letter-spacing:-0.035em; margin-bottom:0.65rem;">
+          Pilih Skill Satuan atau Ambil <span class="serif" style="color:var(--accent-lime);">Paket Bundling Lengkap.</span>
+        </h2>
+        <p style="color:var(--text-secondary); max-width:65ch;">
+          Centang modul yang kamu butuhkan di bawah ini untuk menghitung estimasi harganya secara otomatis, atau pilih <strong>Paket Bundling Lengkap</strong> untuk menghemat hampir 50% sekaligus mendapatkan <strong>Bonus Setup Kerja Awal + Panduan Otomatis AI</strong> secara gratis.
+        </p>
+
+        <div class="pricing-grid">
+
+          <!-- Left: Interactive Skill Selector -->
+          <div>
+            <!-- Full Bundle Banner -->
+            <div class="bundle-banner" id="btn-select-all-bundle">
+              <div>
+                <span class="step-badge" style="margin-bottom:0.35rem; display:inline-block;">★ REKOMENDASI TERBAIK (HEMAT Rp 346.000)</span>
+                <h3 style="font-family:var(--font-display); font-size:1.28rem;">
+                  Paket Bundling Lengkap (Semua 5 Skill + GRATIS Setup Kerja Awal)
+                </h3>
+                <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.2rem;">
+                  Termasuk installer 1-klik <code>install-all.ps1</code>, verifikasi <code>verify.ps1</code>, dan file bacaan otomatis untuk AI kamu.
+                </p>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:0.78rem; color:var(--text-muted); text-decoration:line-through;" class="tabular">Rp 695.000</div>
+                <div style="font-family:var(--font-display); font-size:1.65rem; font-weight:700; color:var(--accent-lime);" class="tabular">Rp 349.000</div>
+              </div>
+            </div>
+
+            <div class="mono" style="color:var(--text-muted); margin: 1rem 0 0.55rem;">
+              ATAU PILIH MODUL SATUAN (ECERAN):
+            </div>
+
+            <div class="skill-Select-list">
+              <label class="skill-check-card is-selected">
+                <div class="skill-check-left">
+                  <input type="checkbox" class="skill-checkbox" value="setup" data-name="Setup Kerja Awal 3-Tier + Grill-Me Protocol + Pro-Architect" data-price="95000" checked />
+                  <div>
+                    <strong style="display:block; font-size:0.94rem;">Bonus Utama: Setup Kerja Awal 3-Tier + Grill-Me Protocol</strong>
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">GEMINI.md, /architect 4-layer, dialectic-architect, &amp; 3 opsi planning</span>
+                  </div>
+                </div>
+                <span class="mono" style="color:var(--accent-teal); font-weight:700;">Rp 95.000</span>
+              </label>
+
+              <label class="skill-check-card is-selected">
+                <div class="skill-check-left">
+                  <input type="checkbox" class="skill-checkbox" value="uimodern" data-name="Skill 01: UI-Modern v2.1 + DESIGN.md + Tailwind v4 + Primitives Kit" data-price="110000" checked />
+                  <div>
+                    <strong style="display:block; font-size:0.94rem;">Skill 01: UI-Modern v2.1 + DESIGN.md + Primitives Kit</strong>
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">Concentric radius math, 4-layer elevation, 7 komponen primitif + E2E</span>
+                  </div>
+                </div>
+                <span class="mono" style="color:var(--accent-teal); font-weight:700;">Rp 110.000</span>
+              </label>
+
+              <label class="skill-check-card is-selected">
+                <div class="skill-check-left">
+                  <input type="checkbox" class="skill-checkbox" value="webmotion" data-name="Skill 02: Web-Motion (GSAP 3.13 + Lenis + motion/react + View Transitions)" data-price="120000" checked />
+                  <div>
+                    <strong style="display:block; font-size:0.94rem;">Skill 02: Web-Motion Choreography (GSAP 3.13 + Lenis)</strong>
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">Single ticker loop, SplitText, Flip, CSS view-timeline, &amp; media_verify.py</span>
+                  </div>
+                </div>
+                <span class="mono" style="color:var(--accent-teal); font-weight:700;">Rp 120.000</span>
+              </label>
+
+              <label class="skill-check-card is-selected">
+                <div class="skill-check-left">
+                  <input type="checkbox" class="skill-checkbox" value="motionilo" data-name="Skill 03: MotionIlo + Remotion v4 + Gate scene_qa.py & storyboard.py" data-price="135000" checked />
+                  <div>
+                    <strong style="display:block; font-size:0.94rem;">Skill 03: MotionIlo + Remotion v4 Video Production</strong>
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">Explainer, kinetic music, brand promo (9:16, 16:9, 1:1) + gate scene_qa.py</span>
+                  </div>
+                </div>
+                <span class="mono" style="color:var(--accent-teal); font-weight:700;">Rp 135.000</span>
+              </label>
+
+              <label class="skill-check-card is-selected">
+                <div class="skill-check-left">
+                  <input type="checkbox" class="skill-checkbox" value="threejs" data-name="Skill 04: Three.js r186 & WebGPU 3D Scene Router" data-price="125000" checked />
+                  <div>
+                    <strong style="display:block; font-size:0.94rem;">Skill 04: Three.js r186 &amp; WebGPU 3D Scene Router</strong>
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">THREE.Timer, HDRLoader, TSL Node Shaders, R3F 9.8, &amp; gltf-transform</span>
+                  </div>
+                </div>
+                <span class="mono" style="color:var(--accent-teal); font-weight:700;">Rp 125.000</span>
+              </label>
+
+              <label class="skill-check-card is-selected">
+                <div class="skill-check-left">
+                  <input type="checkbox" class="skill-checkbox" value="rea" data-name="Skill 05: REA (Reverse Engineer Anything & Clean-Room Synthesis)" data-price="110000" checked />
+                  <div>
+                    <strong style="display:block; font-size:0.94rem;">Skill 05: REA (Forensic UI &amp; Motion Clean-Room Synthesis)</strong>
+                    <span style="font-size:0.78rem; color:var(--text-secondary);">5 fase bedah komponen/animasi referensi + extract_animation.py</span>
+                  </div>
+                </div>
+                <span class="mono" style="color:var(--accent-teal); font-weight:700;">Rp 110.000</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Right: Order Summary & Direct Contact Ilham -->
+          <div class="concentric-shell checkout-card" id="contact-ilham">
+            <div class="concentric-inner">
+              <div class="step-top-row" style="margin-bottom:0.4rem;">
+                <span class="step-badge">INGIN BELI? LANGSUNG HUBUNGI ILHAM</span>
+                <span class="mono" style="color:var(--accent-teal);" id="cart-mode-badge">PAKET LENGKAP AKTIF</span>
+              </div>
+
+              <h3 style="font-family:var(--font-display); font-size:1.45rem;">
+                Ringkasan Paket Pilihanmu
+              </h3>
+              <p style="font-size:0.83rem; color:var(--text-secondary); margin-top:0.2rem;">
+                Setelah memilih modul di samping, salin format pesan otomatis di bawah ini dan kirimkan langsung ke <strong>Ilham</strong> untuk mendapatkan link Google Drive beserta bantuan setup-nya.
+              </p>
+
+              <div class="order-summary-box tabular" id="order-message-preview">Halo Ilham! Aku tertarik beli Paket Bundling Lengkap (Semua 5 Skill Visual/Web + Bonus Setup Kerja Awal 3-Tier &amp; Grill-Me Protocol).
+Estimasi Total: Rp 349.000 (Hemat Rp 346.000).
+Boleh minta info pembayaran dan link Google Drive-nya?</div>
+
+              <div style="display:flex; justify-content:space-between; align-items:baseline; padding:0.65rem 0; border-top:1px solid var(--border-subtle); border-bottom:1px solid var(--border-subtle); margin-bottom:1rem;">
+                <span class="mono" style="color:var(--text-secondary);">ESTIMASI TOTAL HARGA:</span>
+                <strong style="font-family:var(--font-display); font-size:1.75rem; color:var(--accent-lime);" class="tabular" id="cart-total-display">
+                  Rp 349.000
+                </strong>
+              </div>
+
+              <div style="display:grid; gap:0.55rem;">
+                <button type="button" class="btn btn--primary" id="btn-copy-order" style="width:100%;">
+                  📋 Salin Pesan Order untuk Dikirim ke Ilham
+                </button>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.55rem;">
+                  <a href="mailto:xanderilham4@gmail.com?subject=Order%20Antigravity%20Visual%20Skill%20Pack" id="link-email-ilham" class="btn" style="text-align:center;">
+                    ✉️ Email Ilham
+                  </a>
+                  <a href="https://github.com/IlhamXkyo" target="_blank" rel="noopener" class="btn" style="text-align:center;">
+                    🐙 GitHub @IlhamXkyo ↗
+                  </a>
                 </div>
               </div>
             </div>
-          </article>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ====================================================================
-         BAB 04: ADAPTASI DI GEMINI HYDROGEN & GEMINI ARGON
-         ==================================================================== -->
-    <section class="story-section" id="engines">
-      <div class="container">
-        <div class="eyebrow">BAB 04 // KOMPATIBILITAS GEMINI HYDROGEN &amp; ARGON</div>
-        <h2 class="section-title">Dirancang agar Cepat di Hydrogen &amp; Mendalam di Argon.</h2>
-        <p class="section-lead">
-          Setiap file <code>SKILL.md</code> di dalam paket ini menggunakan pengatur kedalaman berbasis tugas (<code>mode: fast | standard | deep</code>) sehingga tidak memboroskan token saat membuat komponen cepat, namun tetap ketat saat membangun sistem besar.
-        </p>
-
-        <div class="matrix-grid">
-          <div class="concentric-card">
-            <div class="concentric-card__inner">
-              <div class="tier-badge" style="display:inline-block; margin-bottom:0.65rem;">OPTIMAL UNTUK GEMINI HYDROGEN (FAST / MEDIUM)</div>
-              <h3 style="font-family:var(--font-display); font-size:1.35rem; margin-bottom:0.5rem;">
-                Jalur Cepat (<code>mode: fast</code>) Tanpa Buka Banyak File
-              </h3>
-              <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1rem;">
-                Untuk pembuatan komponen tunggal atau iterasi UI cepat, agen langsung menggunakan blok starter mandiri di 30 baris pertama <code>SKILL.md</code> tanpa membuka puluhan file di folder <code>references/</code>.
-              </p>
-              <ul class="skill-meta-list" style="margin-bottom:0;">
-                <li>Hemat hingga 40.000+ token konteks per percakapan.</li>
-                <li>Token CSS mandiri dan starter GSAP/Three.js r186 langsung tersedia di entry point.</li>
-                <li>Tanpa kuesioner berbelit: langsung eksekusi dengan parameter default yang terukur.</li>
-              </ul>
-            </div>
           </div>
 
-          <div class="concentric-card">
-            <div class="concentric-card__inner">
-              <div class="tier-badge" style="display:inline-block; margin-bottom:0.65rem; color:var(--accent-teal); background:var(--accent-teal-soft);">OPTIMAL UNTUK GEMINI ARGON (HIGH / PRO)</div>
-              <h3 style="font-family:var(--font-display); font-size:1.35rem; margin-bottom:0.5rem;">
-                Jalur Arsitektur Penuh (<code>mode: standard &amp; deep</code>)
-              </h3>
-              <p style="font-size:0.88rem; color:var(--text-secondary); margin-bottom:1rem;">
-                Untuk produksi video multi-scene, aplikasi skala penuh, atau dekonstruksi forensik 5 fase, agen memuat modul referensi spesifik dan menjalankan skrip verifikasi mesin sebelum menyerahkan hasil.
-              </p>
-              <ul class="skill-meta-list" style="margin-bottom:0;">
-                <li>Menyusun JSON Scene Manifest lengkap dan memvalidasinya dengan <code>scene_qa.py</code>.</li>
-                <li>Memisahkan 4-Layer Headless Engine (<code>/architect</code>) dan menguji bottleneck (<code>dialectic-architect</code>).</li>
-                <li>Menjalankan verifikasi media FFmpeg (<code>media_verify.py</code>) dan Playwright E2E runner.</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ====================================================================
-         BAB 05: STRUKTUR PAKET GOOGLE DRIVE & PANDUAN OTOMATIS AI
-         ==================================================================== -->
-    <section class="story-section" id="package">
-      <div class="container">
-        <div class="eyebrow">BAB 05 // ISI FOLDER GOOGLE DRIVE &amp; INSTALASI 1-PERINTAH</div>
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:1.25rem; flex-wrap:wrap;">
-          <div>
-            <h2 class="section-title">Tinggal Suruh AI Baca Satu File, Semua Langsung Terpasang.</h2>
-            <p class="section-lead">
-              Seluruh modul sudah dikemas rapi di dalam folder siap unduh lengkap dengan panduan bacaan khusus untuk AI dan skrip installer otomatis.
-            </p>
-          </div>
-          <button type="button" class="btn btn--primary" id="btn-copy-ai-cmd">
-            📋 Salin Perintah Setup untuk AI
-          </button>
-        </div>
-
-        <div class="drive-layout">
-          <div role="tablist" aria-label="Daftar Folder Paket Drive">
-            <button type="button" class="drive-item active" data-pkg="p00">
-              <span>📄 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md</span>
-              <span style="color:var(--accent-lime);">Master AI Guide</span>
-            </button>
-            <button type="button" class="drive-item" data-pkg="p06">
-              <span>🎁 06-Bonus-Setup-Utama-Arsitektur-Global</span>
-              <span style="color:var(--accent-lime);">Setup Kerja Awal</span>
-            </button>
-            <button type="button" class="drive-item" data-pkg="p01">
-              <span>📁 01-Setup-Motion-Graphics-Motionilo</span>
-              <span>Video + scene_qa.py</span>
-            </button>
-            <button type="button" class="drive-item" data-pkg="p02">
-              <span>📁 02-Setup-Web-Motion-Choreography</span>
-              <span>GSAP 3.13 + Lenis</span>
-            </button>
-            <button type="button" class="drive-item" data-pkg="p03">
-              <span>📁 03-Setup-UI-Modern-Design-System</span>
-              <span>UI + Primitives Kit</span>
-            </button>
-            <button type="button" class="drive-item" data-pkg="p04">
-              <span>📁 04-Setup-3D-WebGL-ThreeJS</span>
-              <span>Three.js r186 + WebGPU</span>
-            </button>
-            <button type="button" class="drive-item" data-pkg="p05">
-              <span>📁 05-Setup-Reverse-Engineering-REA</span>
-              <span>Clean-Room Forensics</span>
-            </button>
-          </div>
-
-          <div class="code-window">
-            <div class="code-window__bar">
-              <span id="pkg-window-title">drive-package // 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md</span>
-              <div class="window-dots"><i></i><i></i><i></i></div>
-            </div>
-            <div class="code-window__body tabular" id="pkg-window-body">Perintah 1-Baris untuk Dikirim ke AI:
-"Tolong baca file 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md di folder ini, lalu pasangkan setup kerjaan awal serta seluruh skill visual dan web-nya ke lingkunganku."
-
-Struktur Paket Lengkap:
-├── 00-PANDUAN-UTAMA-UNTUK-AI-DAN-PEMBELI.md
-├── 01-Setup-Motion-Graphics-Motionilo/
-├── 02-Setup-Web-Motion-Choreography/
-├── 03-Setup-UI-Modern-Design-System/
-├── 04-Setup-3D-WebGL-ThreeJS/
-├── 05-Setup-Reverse-Engineering-REA/
-└── 06-Bonus-Setup-Utama-Arsitektur-Global/
-    ├── GEMINI-GLOBAL-RULES.md         (Setup Aturan Global &amp; Routing)
-    ├── pro-architect/                 (/architect 4-Layer Headless)
-    ├── dialectic-architect/           (Adversarial System Review)
-    ├── DAFTAR-KURASI-PLUGIN-PENDUKUNG.md
-    ├── install-all.ps1                (Installer Otomatis)
-    └── verify.ps1                     (Verifikasi Integritas SHA-256)</div>
-          </div>
         </div>
       </div>
     </section>
 
   </main>
 
-  <footer style="padding: 3rem 0 5.5rem; color: var(--text-muted); font-size: 0.8rem;">
+  <footer style="padding: 2.5rem 0 5rem; color: var(--text-muted); font-size: 0.78rem;">
     <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
-      <span class="mono">AUTONOMOUS VISUAL &amp; WEB ENGINEERING SUITE · HYDROGEN &amp; ARGON READY</span>
+      <span class="mono">AUTONOMOUS VISUAL &amp; WEB SKILL STORE · DIKEMBANGKAN OLEH ILHAM (@ILHAMXKYO)</span>
       <span class="mono">TIP: DOUBLE-KLIK DI MANA SAJA UNTUK MELEMPAR ORB KE RUBAH STUDIO 🦊</span>
     </div>
   </footer>
 
-  <!-- Cohesive Origami Fox Companion Dock -->
-  <aside class="fox-dock" aria-label="Pendamping Studio Interaktif">
+  <!-- Companion Fox Dock -->
+  <aside class="fox-dock" aria-label="Pendamping Studio Kuro">
     <div class="fox-bubble" id="fox-bubble">
-      <div class="fox-bubble__top">
-        <span>🦊 KURO // PENDAMPING STUDIO</span>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+        <span class="mono" style="font-size:0.64rem; color:var(--accent-lime);">🦊 KURO // ASISTEN KATALOG</span>
         <button type="button" id="btn-fox-close" style="color:var(--text-muted); font-size:0.75rem;">✕</button>
       </div>
       <div id="fox-speech">
-        Halo! Klik aku atau double-klik di mana saja di halaman ini untuk memanggil kejutan fisika!
+        Gulir ke bawah untuk melihat panggung 3D berubah mengikuti tiap bab skill, atau cek estimasi harganya di bawah!
       </div>
     </div>
 
-    <button type="button" class="fox-trigger-btn" id="btn-fox-dock" title="Panggil kejutan rubah interaktif">
-      <svg viewBox="0 0 100 100" width="42" height="42" aria-hidden="true">
+    <button type="button" class="fox-btn" id="btn-fox-dock" title="Panggil kejutan rubah interaktif">
+      <svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true">
         <polygon points="16,44 28,12 45,36" fill="#f59e0b" />
         <polygon points="84,44 72,12 55,36" fill="#f59e0b" />
         <polygon points="18,40 82,40 90,70 50,92 10,70" fill="#fbbf24" />
         <polygon points="28,66 72,66 50,92" fill="#f4f2ed" />
-        <g id="fox-dock-eyes">
-          <circle cx="35" cy="56" r="5" fill="#08090d" />
-          <circle cx="65" cy="56" r="5" fill="#08090d" />
+        <g id="fox-eyes">
+          <circle cx="35" cy="56" r="5" fill="#07080c" />
+          <circle cx="65" cy="56" r="5" fill="#07080c" />
         </g>
-        <polygon points="45,73 55,73 50,80" fill="#08090d" />
+        <polygon points="45,73 55,73 50,80" fill="#07080c" />
       </svg>
     </button>
   </aside>
